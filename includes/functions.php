@@ -2,32 +2,30 @@
 
 /*
  * Google Maps functions
- * /
+ */
 
-/* Output the JS for Google Maps */
-function map_js($coord, $zoom = 15, $addl_code = "") {
+/* Output the JS for Google Maps
+ * Requires: $coord: An array of the coordinates to focus on
+ 			 $zoom: The numerical value of initial map zoom (default 15)
+ 			 $addl_code: Any additional JS to run once the map is initialized
+ * Returns: The complete HTML-wrapped code for including Google Maps
+ */
+function gmaps_js($coord, $zoom = 15, $addl_code = "") {
 
 ?>
 <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD2I6hIV9yR7AV97_Tni5srwUcNKkURk98&sensor=true"></script>
 <script type="text/javascript">
-var infowindowCur, marker_cur, map;
-var iwindows = new Array();
-var markers = new Array();
+var currentInfoWindow, currentMarker, map;
+var infoWindows = new Array(); // Array of popup info windows
+var markers = new Array(); // Array of map markers
+
+/* Closes the given window and reflects it in array */
 function close_window(cur_window) {
-	for (var i = 0; i < iwindows.length; i++) {
-		if (iwindows[i] != cur_window) {
-			iwindows[i].close();
+	for (var i = 0; i < infoWindows.length; i++) {
+		if (infoWindows[i] != cur_window) {
+			infoWindows[i].close();
 		}
 	}
-}
-function initialize_map() {
-	var mapOptions = {
-		center: new google.maps.LatLng(<?php echo implode(',', $coord); ?>),
-		zoom: 15,
-		mapTypeId: google.maps.MapTypeId.ROADMAP
-	};
-	map = new google.maps.Map(document.getElementById("map-canvas"), mapOptions);
-	<?php echo $addl_code; ?>
 }
 $(document).ready(function() {
 	$('*').css({
@@ -38,7 +36,15 @@ $(document).ready(function() {
 		width: $(window).width(),
 		height: $(window).height()
 	});
-	initialize_map();
+
+	// Initialize the embedded Google Map
+	var mapOptions = {
+		center: new google.maps.LatLng(<?php echo implode(',', $coord); ?>),
+		zoom: <?php echo $zoom; ?>,
+		mapTypeId: google.maps.MapTypeId.ROADMAP
+	};
+	map = new google.maps.Map($("#map-canvas").get(0), mapOptions);
+	<?php echo $addl_code; ?>
 });
 <?php
 
@@ -46,15 +52,21 @@ $(document).ready(function() {
 
 /*
  * Miscellaneous functions
- * /
+ */
  
 /* Redirect the browser, default is main page.
- * Uses header(), headers can't be called already. */
+ * Requires: That headers haven't been sent yet
+ 			 $url: The url to be redirected to
+ * Returns: (nothing)
+ */
 function redirect($url = "http://scyberia.org/projects/cornell-dining") {
 	header('Location: ' . $url);
 }
 
-/* Get Google link for given JS lib directly from Google */
+/* Get link for Google-hosted library given JS lib name
+ * Requires: $lib_name: The name of a common JS library
+ * Returns: The complete HTML snippet to include the JS lib
+ */
 function get_google_snippet($lib_name) {
 	$lib_name = str_replace(' ', '-', strtolower($lib_name));
 	$page_contents = file_get_contents('https://developers.google.com/speed/libraries/devguide');
@@ -68,10 +80,14 @@ function get_google_snippet($lib_name) {
 			}
 		}
 	}
+	exit("Library not found.");
 }
 
 /* Searches $haystack to see if $needle is part of an element.
- * E.g. "hi" in ["hilo", "hello"] returns 0 */
+ * Requires: $needle: A string
+ *			 $haystack: An array of strings
+ * Returns: The index of the first element of $haystack that contains $needle
+ */
 function array_search_part($needle, $haystack) {
 	foreach ($haystack as $key => $element) {
 		if (strpos($element, $needle) !== false) {
@@ -81,10 +97,12 @@ function array_search_part($needle, $haystack) {
 	return false;
 }
 
-/* Separates $string by $delimiter and capitalizes first character of each separated string.
- * E.g. "hello_world" -> "Hello World" */
-function capitalize($string, $delimiter = "_") {
-	$separated = explode($delimiter, $string);
+/* Converts an underscore-delimited string to title case
+ * Requires: $string: A string
+ * Returns: A string with spaces instead of underscores in title case
+ */
+function capitalize($string) {
+	$separated = explode("_", $string);
 	foreach ($separated as $key => $phrase) {
 		$separated[$key] = strtoupper(substr($phrase, 0, 1)) . substr($phrase, 1);
 	}

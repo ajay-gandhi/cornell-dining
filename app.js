@@ -1,6 +1,7 @@
 var request = require('request'),
     Promise = require('es6-promise').Promise,
-    em = require('./eatery');
+    em = require('./eatery'),
+    server = require('./server');
 
 var all_eateries = [];
 var open_now = [];
@@ -9,6 +10,7 @@ var num_eateries = 0;
 // Fetch the name of every eatery
 var api_url = 'http://redapi-tious.rhcloud.com/dining';
 request(api_url, function (error, response, body) {
+  console.log('Fetched eatery names.');
 
   if (error) {
     // Output the error if one occurs
@@ -18,6 +20,7 @@ request(api_url, function (error, response, body) {
     var eateries = JSON.parse(body);
     num_eateries = eateries.length;
 
+    console.log('Fetching eatery data...');
     // Loop through all the eateries, finding out if they are open
     eateries.forEach(function (eatery_name) {
 
@@ -27,7 +30,6 @@ request(api_url, function (error, response, body) {
 
           // Now that we have the event data for the eatery, check if it's open
           em.is_open(results, new Date()).then(function (status) {
-            console.log(prettify_name(eatery_name));
 
             // Add the result to an array, regardless of what it is
             all_eateries.push({
@@ -35,19 +37,16 @@ request(api_url, function (error, response, body) {
               status: status
             });
 
-            if (status == false) {
-              console.log('CLOSED\n');
-            } else {
+            if (status != false) {
               open_now.push({
                 eatery: eatery_name,
                 status: status
               });
-              console.log(status.summary);
-              console.log();
             }
 
             if (num_eateries == all_eateries.length) {
-              // All queries are finished
+              console.log('Done.\n');
+              server.start_server(JSON.stringify(all_eateries));
             }
           });
         })

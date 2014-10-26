@@ -1,30 +1,187 @@
 /**
  * This module handles eatery data. This includes fetching the data and parsing
  * it to see if a given eatery is open.
+ *
+ * Because many methods make API calls or could take time to compute, they
+ * return Promises rather than actual content.
  */
 
 var request = require('request'),
     Promise = require('es6-promise').Promise;
 
+// RedAPI Endpoint
+var api_url = 'http://redapi-tious.rhcloud.com/dining';
+
+// These locally available variable will be set by the getter methods below to
+// save time if the method is called numerous times on the same parameters
+var num_eateries,
+    eatery_names,
+    eatery_events = {};
+
+
+/******************************* Module Exports *******************************/
+
 /**
- * Fetches the event data from RedAPI about the given eatery
- * Requires: The name of the eatery
- * Returns: An object containing all the event data for eatery
+ * Returns an array of the names of every eatery on campus and sets the local
+ *   variable to save time next time the function is called.
+ * Returns [Promise] A list of the name of each on-campus eatery
  */
-module.exports.get_eatery_events = function(eatery) {
-  var api_url = 'http://redapi-tious.rhcloud.com/dining/' + eatery;
-
+var get_eatery_names = function() {
   return new Promise(function (resolve, reject) {
-    request(api_url, function (error, response, body) {
+    // If the local variable is already set, just return that data
+    if (!is_empty(eatery_names)) {
+      resolve(eatery_names);
 
-      // Return errors if they occur
-      if (error) {
-        reject(error);
-      } else if (!error && response.statusCode == 200) {
-        // Parse the result and return only the event data
-        resolve(JSON.parse(body).events);
-      } else {
-        reject('Some other error occured. Status: ' + response.statusCode);
+    } else {
+      // The local var is not set, we have to query the API
+      request(api_url, function (error, response, body) {
+        if (error) {
+          reject(error);
+        } else if (response.statusCode == 200) {
+          // Set the local variable then return the data
+          eatery_names = JSON.parse(body);
+          resolve(eatery_names);
+        } else {
+          // Some other error occured, return the response object as an error
+          reject(response);
+        }
+      });
+    }
+  });
+}
+
+/**
+ * Returns the number of eateries.
+ * Returns [Promise] The number of eateries
+ */
+var get_num_eateries = function() {
+  return new Promise(function(resolve, reject) {
+    if (num_eateries) {
+      resolve(num_eateries);
+    } else {
+      get_eatery_names()
+        .then(function (names) {
+          num_eateries = names.length;
+          resolve(num_eateries);
+        })
+        .catch(console.error);
+    }
+  });
+}
+
+/**
+ * Fetches the event data from RedAPI about the given eatery.
+ * Requires: [string] eatery - The name of the eatery
+ * Returns: [Promise] An object containing all the event data for eatery
+ */
+var get_eatery_events = function(eatery) {
+  return new Promise(function (resolve, reject) {
+    // If the local variable is alredady set, just return that data
+    if (!is_empty(eatery_events) && eatery_events[eatery]) {
+      resolve(eatery_events[eatery]);
+
+    } else {
+      // The local var is not set, we have to query the API
+      request(api_url + '/' + eatery, function (error, response, body) {
+        if (error) {
+          reject(error);
+        } else if (response.statusCode == 200) {
+          // Parse the result and return only the event data
+          // Set the local variable first.
+          eatery_events[eatery] = JSON.parse(body).events;
+          resolve(eatery_events[eatery]);
+        } else {
+          // Some other error occured, return the response object as an error
+          reject(response);
+        }
+      });
+    }
+  });
+}
+
+/**
+ * Fetches the event data from RedAPI for each eatery in the given list.
+ * Returns: [Promise] An object containing the event data for the given eateries
+ */
+var all_eatery_events = function() {
+  return new Promise(function (resolve, reject) {
+    if (!is_empty(eatery_events)) {
+      resolve(eatery_events);
+    } else {
+      // First get a list of all the eateries
+      var eateries;
+      get_eatery_names()
+        .then(function (e) {
+          eateries = e;
+          // Get the number of eateries
+          return get_num_eateries();
+        }).then(function (num) {
+
+          // Loop through all the eateries, finding out if they are open
+          eateries.forEach(function (eatery_name) {
+
+            // Now get the event data for this eatery
+            get_eatery_events(eatery_name)
+              .then(function (results) {
+
+                // Set the information
+                eatery_events[eatery_name] = results;
+
+                // When all the eatery data has been set, return the data
+                if (num == Object.keys(eatery_events).length) {
+                  resolve(eatery_events);
+                }
+              })
+              .catch(console.error);
+          });
+        })
+        .catch(console.error);
+    }
+  });
+}
+
+/**
+ * Given a Date object, returns a mapping of each eatery to its status. If the
+ *   eatery is open at the given time, the mapping will contain, information
+ *   about the eatery's summary, open, and closing times, otherwise false. If
+ *   parameter open_only is true, the mapping only includes eateries that are
+ *   open.
+ * Requires: [Date]    currently - The time to check
+ *           [boolean] open_only - Whether to only include open eateries
+ * Returns: [Promise] A mapping of every given eatery to its current status.
+ */
+var are_open = function(currently, open_only) {
+  return new Promise(function (resolve, reject) {
+    var places = {},
+        all_events;
+
+    // Get all the event data
+    all_eatery_events().then(function (a) {
+      all_events = a;
+      return get_num_eateries();
+    }).then(function (num) {
+      var done = 0;
+
+      // Loop through each set of events
+      // Each key is the name of a eatery and each value is the set of events
+      // associated with that eatery
+      for (var name in all_events) {
+        events = all_events[name];
+
+        // Get the status of the place and add it to the mapping
+        is_open(name, events, currently).then(function (ret) {
+          // Increment a counter so that when the last request completes,
+          // the entire set of data can be resolved
+          done++;
+
+          // Add the returned data to the accumulator, if appropriate
+          if (!open_only || ret[1] != false) {
+            places[ret[0]] = ret[1];
+          }
+          if (done == num) {
+            resolve(places);
+          }
+        });
       }
     });
   });
@@ -32,12 +189,13 @@ module.exports.get_eatery_events = function(eatery) {
 
 /**
  * Checks whether an eatery is open at the given time.
- * Requires: The event data for the eatery and a date object representing the
- *   time to check
- * Returns: Relevant data about the eatery if it is open, and false if it is
- *   closed at the given time
+ * Requires: [String]     name        - The name of the eatery
+ *           [Event Data] eatery_data - The event data for the eatery
+ *           [Date]       currently   - The time to check
+ * Returns: [Promise] An array of the eatery's name, and relevant data about the
+ *   eatery if it is open, and false if it is closed at the given time
  */
-module.exports.is_open = function(eatery_data, currently) {
+var is_open = function(name, eatery_data, currently) {
   return new Promise(function (resolve, reject) {
     // Loop through all the events
     eatery_data.forEach(function (elm) {
@@ -103,7 +261,7 @@ module.exports.is_open = function(eatery_data, currently) {
 
                   // Now check if the time is in the interval
                   if (min_time <= this_time && this_time <= max_time) {
-                    resolve(relevant_data(elm));
+                    resolve([name, relevant_data(elm)]);
                   }
                 }
               } else {
@@ -125,7 +283,7 @@ module.exports.is_open = function(eatery_data, currently) {
 
                 // Now check if the time is in the interval
                 if (min_time <= this_time && this_time <= max_time) {
-                  resolve(relevant_data(elm));
+                  resolve([name, relevant_data(elm)]);
                 }
               }
             }
@@ -140,7 +298,7 @@ module.exports.is_open = function(eatery_data, currently) {
           // Check if the place is open between those times
           if (start_time.getTime() <= currently.getTime()
             && currently.getTime() <= end_time.getTime()) {
-            resolve(relevant_data(elm));
+            resolve([name, relevant_data(elm)]);
           }
         }
       }
@@ -148,9 +306,19 @@ module.exports.is_open = function(eatery_data, currently) {
 
     // If nothing has been returned at this point,
     // return false (eatery is closed at the given time)
-    resolve(false);
+    resolve([name, false]);
   });
 }
+
+// Add everything to module exports
+module.exports.get_eatery_names  = get_eatery_names;
+module.exports.get_num_eateries  = get_num_eateries;
+module.exports.get_eatery_events = get_eatery_events;
+module.exports.all_eatery_events = all_eatery_events;
+module.exports.are_open          = are_open;
+module.exports.is_open           = is_open;
+
+/******************************* Local Functions ******************************/
 
 /**
  * Parses a time string from Google Calendar into a time represented by
@@ -208,9 +376,23 @@ var day_of_year = function(date_obj) {
 var relevant_data = function(evt) {
   var s = parse_time(evt.start);
   var e = parse_time(evt.end);
-  return {
+  var return_obj = {
     start: (s.getHours() * 100) + s.getMinutes(),
     end: (e.getHours() * 100) + e.getMinutes(),
-    summary: evt.summary,
+    summary: evt.summary
+  }
+  return return_obj;
+}
+
+/**
+ * Given any object, returns whether the object is empty ({}).
+ * Requires: [Object] An object
+ * Returns: [boolean] True if the object is empty
+ */
+var is_empty = function(obj) {
+  if (JSON.stringify(obj) == '{}' || obj == undefined) {
+    return true;
+  } else {
+    return false;
   }
 }

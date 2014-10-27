@@ -3,15 +3,22 @@ var request = require('request'),
     em = require('./eatery'),
     server = require('./server');
 
-server.start_server();
+var d2c = new Date('2014-10-26T20:00:00.000Z');
 
-// var d2c = new Date();
-// 
+var e_location,
+    e_building,
+    e_type;
+
 // All the open halls
-// em.are_open(d2c, true).then(console.log);
-// 
-// All the halls
-// em.are_open(d2c, false).then(console.log);
+console.log('Getting dining hall information...');
+em.are_open(d2c, true).then(function (which_open) {
+
+  // Everything is ready, start the server
+  server.start_server({
+    which_open: which_open
+  });
+  console.log('Server running on port 8080!');
+});
 
 /**
  * Given a string containing underscores rather than spaces, such as

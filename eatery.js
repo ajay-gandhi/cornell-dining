@@ -18,6 +18,10 @@ var num_eateries,
     eatery_names,
     eatery_events = {};
 
+var e_latlongs  = {},
+    e_buildings = {},
+    e_payments  = {};
+
 
 /******************************* Module Exports *******************************/
 
@@ -261,7 +265,7 @@ var is_open = function(name, eatery_data, currently) {
 
                   // Now check if the time is in the interval
                   if (min_time <= this_time && this_time <= max_time) {
-                    resolve([name, relevant_data(elm)]);
+                    resolve([name, relevant_data(name, elm)]);
                   }
                 }
               } else {
@@ -283,7 +287,7 @@ var is_open = function(name, eatery_data, currently) {
 
                 // Now check if the time is in the interval
                 if (min_time <= this_time && this_time <= max_time) {
-                  resolve([name, relevant_data(elm)]);
+                  resolve([name, relevant_data(name, elm)]);
                 }
               }
             }
@@ -298,7 +302,7 @@ var is_open = function(name, eatery_data, currently) {
           // Check if the place is open between those times
           if (start_time.getTime() <= currently.getTime()
             && currently.getTime() <= end_time.getTime()) {
-            resolve([name, relevant_data(elm)]);
+            resolve([name, relevant_data(name, elm)]);
           }
         }
       }
@@ -323,11 +327,11 @@ module.exports.is_open           = is_open;
 /**
  * Parses a time string from Google Calendar into a time represented by
  *   milliseconds since the Unix timestamp
- * Requires: A time string taken from Google Calendar. If the time does not
- *   follow a common time representation standard, a reference time must be
- *   passed to allow proper formatting of the time
- * Returns: The number of milliseconds since the Unix timestamp that is equal
- *   to the given time
+ * Requires: [String] time - A string representing a time.
+ *           [String] ref  - If the given time does not follow a common time
+ *   representation standard, a reference time must be passed to allow proper
+ *   formatting of the given time
+ * Returns: [Date] A Date object representing the given time
  */
 var parse_time = function(time, ref) {
   // Google Calendar returns time in one of two formats
@@ -348,8 +352,8 @@ var parse_time = function(time, ref) {
 /**
  * Given a Date object, returns the day of the week as an uppercase two-letter
  *   string
- * Requires: A valid Date object
- * Returns: The two-letter uppercase representation of the day of the week
+ * Requires: [Date] date_obj - A valid Date object
+ * Returns: [String] The two-letter uppercase representation of the day of the week
  *   represented by the Date object
  */
 var day_of_week = function(date_obj) {
@@ -359,8 +363,8 @@ var day_of_week = function(date_obj) {
 
 /**
  * Given a Date object, returns the day of the year as an integer from 1 to 366
- * Requires: A valid date object
- * Returns: An integer from 1 to 366 representing the day of the year
+ * Requires: [Date] date_obj - A valid date object
+ * Returns: [int] An integer from 1 to 366 representing the day of the year
  */
 var day_of_year = function(date_obj) {
   var first = new Date(date_obj.getFullYear(), 0, 1);
@@ -368,12 +372,14 @@ var day_of_year = function(date_obj) {
 }
 
 /**
- * Returns only relevant data of a Google calendar event. This entails:
- *
- * Requires: A Google calendar event, such as one returned from RedAPI
- * Returns: The relevanat data of a Google calendar event as listed above.
+ * Returns only relevant data about an eatery. This entails:
+ *   { opening time, closing time, summary, lat/long, building, payment type }
+ * Requires: [String] n   - The name of the eatery
+ *           [Object] evt - A Google calendar event
+ * Returns: [Object] The data of an eatery as listed above.
  */
-var relevant_data = function(evt) {
+var relevant_data = function(n, evt) {
+  // This data is available from the inputted event data
   var s = parse_time(evt.start);
   var e = parse_time(evt.end);
   var return_obj = {
@@ -381,7 +387,31 @@ var relevant_data = function(evt) {
     end: (e.getHours() * 100) + e.getMinutes(),
     summary: evt.summary
   }
-  return return_obj;
+
+  // The following data needs to taken from the hardcoded eatery data
+  if (e_latlongs[n]) {
+    // The local vars are set, use those
+    return_obj.latlong  = e_latlongs[n];
+    return_obj.building = e_buildings[n];
+    return_obj.payment  = e_payments[n];
+
+    return return_obj;
+
+  } else {
+    // The local vars are not set, so get the information, set the vars, then
+    // return the data
+    var e_info = require('./eatery_information.json');
+
+    e_latlongs[n]  = e_info.latlongs[n];
+    e_buildings[n] = e_info.buildings[n];
+    e_payments[n] = e_info.payments[n];
+
+    return_obj.latlong  = e_latlongs[n];
+    return_obj.building = e_buildings[n];
+    return_obj.payment = e_payments[n];
+
+    return return_obj;
+  }
 }
 
 /**

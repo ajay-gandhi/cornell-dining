@@ -19,7 +19,7 @@
 
   $(document).ready(function() {
     $.ajax({
-      url: 'open',
+      url: 'which_open',
     }).done(function (data) {
       $('div#loading-wrapper')
         .css({
@@ -33,6 +33,7 @@
           duration: ($(window).height() * 2),
           complete: function() {
             $(this).remove();
+            console.log(data);
           }
         });
     });

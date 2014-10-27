@@ -19,13 +19,13 @@ module.exports.start_server = function(data) {
     var fs_path = request_parts.pathname;
 
     console.log('Received request:');
-    console.log(request_parts);
+    console.log(fs_path);
     console.log();
 
     // If path is root, set it to index
     fs_path = (fs_path == '/' || fs_path == '') ? '/index.html' : fs_path;
 
-    // 
+    // Check if the file exists in the html subdir
     fs.exists('html' + fs_path, function (exists) {
       if (exists) {
         // The file exists on the server, so serve it up
@@ -39,8 +39,14 @@ module.exports.start_server = function(data) {
           res.write(file, 'utf8');
           res.end();
         });
+      } else if (data[fs_path.substr(1)] != undefined) {
+        res.writeHead(200);
+        console.log(data);
+        res.write(JSON.stringify(data[fs_path.substr(1)]));
+        res.end();
       } else {
-        // File doesn't exist, redirect to index page
+        // File doesn't exist and inputted data object doesn't contain
+        // reference, redirect to index page
         res.writeHead(302, {
           'Location': '/index.html'
         });
@@ -49,6 +55,5 @@ module.exports.start_server = function(data) {
     });
   });
 
-  console.log('Listening on port 8080!');
   this_server.listen(8080);
 }

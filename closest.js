@@ -15,7 +15,6 @@ var api_url = 'https://maps.googleapis.com/maps/api/distancematrix/json'
 // json?origins=42.4447437452151,-76.48434111717543&destinations=42.446697,-76.485572
 
 module.exports.closest = function (data, user_loc) {
-  user_loc = [42.446674, -76.487544];
 
   return new Promise(function (resolve, reject) {
     var halls = [];
@@ -48,6 +47,7 @@ module.exports.closest = function (data, user_loc) {
             // console.log(place);
             dist = parseInt(imp[0].distance.value);
             closest_place = place;
+            closest_place.distance = imp[0].duration.text;
           }
 
           // Another request has been completed, increment counter

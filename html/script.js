@@ -49,6 +49,31 @@ $(document).ready(function() {
           complete: function() {
             // Remove the cover from the page
             $(this).remove();
+
+            // Append the closest eatery button
+            // $('body').append('<div id="where">Where<br />should<br />I eat?</div>');
+            $('body').append('<div id="where">Find<br />me a place<br />to eat!</div>');
+            $('div#where')
+              // Hide it first
+              .css({
+                bottom: '-100px',
+                left: ($(window).width() / 2) - 100
+              })
+              // Slide it up
+              .animate({
+                bottom: '0px'
+              })
+              // Slide it down on click and find the closest place
+              .click(function () {
+                find_closest(data);
+                $(this).animate({
+                  bottom: '-100px'
+                }, {
+                  complete: function () {
+                    $(this).remove();
+                  }
+                });
+              });
           }
         });
       }
@@ -98,6 +123,9 @@ var add_infowindow = function (e, m, n) {
 
   // Click event for the marker associated with this infowindow
   google.maps.event.addListener(m, 'click', function() {
+    // Stop the marker's animation
+    m.setAnimation(null);
+
     // Close all other infowindows
     for (var i = 0; i < infowindows.length; i++) {
       infowindows[i].close();
@@ -127,8 +155,94 @@ var prettify_name = function (n) {
   return n.substr(0, 1).toUpperCase() + n.substr(1);
 }
 
+/**
+ * Display a temporary notification at the top of the screen
+ * Requires: [String] msg   - The content of the notification
+ *           [int] duration - The duration of the notification in ms
+ */
+var notify = function (msg, duration) {
+  // Create a unique id for the notification
+  var id = Math.floor((Math.random() * 10000) + 1).toString();
 
+  // Default duration is 6 seconds
+  if (!duration) {
+    duration = 6000;
+  }
 
+  var new_html = '<div class="notification" id="notification-wrapper-' + id + '">'
+    + '<div id="notification-' + id + '">' + msg + '</div>'
+    + '</div>';
+  $('body').append(new_html);
+
+  // Remove the notification if it is clicked
+  $('div#notification-' + id).click(function() {
+    removeNotification(id);
+  });
+
+  // Slide the notification down
+  $('div#notification-wrapper-' + id).animate({
+    top: '0px'
+  }, {
+    duration: 1000,
+    complete: function() {
+      // Remove the notification after the given duration
+      setTimeout(function() {
+        removeNotification(id);
+      }, duration);
+    }
+  });
+}
+
+/**
+ * Removes the notification associated with the given id
+ * Requires: [String] id - The unique id of the notification
+ */
+var remove_notification = function (id) {
+  if ($('div#notification-wrapper-' + id).length != 0) {
+    $('div#notification-wrapper-' + id).animate({
+      top: '-100px'
+    }, {
+      duration: 1000,
+      complete: function() {
+        $(this).remove();
+      }
+    });
+  }
+}
+
+var find_closest = function (data) {
+  // Ask for the user's location
+  navigator.geolocation.getCurrentPosition(function (position) {
+    // Got the position, now query the server for closest eatery
+    // Pass the user's location and the currently open places
+    $.ajax({
+      url: 'closest',
+      data: {
+        events: data,
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      }
+    }).done(function (c) {
+      // c is the nearest dining hall, notify the user
+      c = JSON.parse(c);
+      var notif_msg = prettify_name(c.name) + ' is the only '
+        + c.distance + ' away.';
+      notify(notif_msg);
+
+      // Animate the marker associated with the closest eatery
+      markers.forEach(function (marker) {
+        if (marker.getTitle() == c.name) {
+          marker.setAnimation(google.maps.Animation.BOUNCE);
+        }
+      });
+    });
+  }, function (err) {
+    // There was some error (see geolocation docs)
+    if (err.code != 1) {
+      notify('Unable to find your location.');
+    }
+  });
+}
 
 
 

@@ -2,10 +2,11 @@
  * This module controls the server itself, including dynamic and static data.
  */
 
-var http = require('http'),
-    fs   = require('fs'),
-    url  = require('url'),
-    qs   = require('querystring');
+var http    = require('http'),
+    fs      = require('fs'),
+    url     = require('url'),
+    qs      = require('querystring'),
+    closest = require('./closest');
 
 // Thanks to B T for contributing to this web server code
 // http://stackoverflow.com/a/26354478/1211985
@@ -25,7 +26,7 @@ module.exports.start_server = function(eatery_object) {
 
     // Log some basic info
     console.log('Received request:');
-    console.log(request_parts.path);
+    console.log(fs_path);
     console.log();
 
     // If path is root, set it to index
@@ -45,6 +46,7 @@ module.exports.start_server = function(eatery_object) {
           res.write(file);
           res.end();
         });
+
       } else if (fs_path == '/open') {
         // This is the AJAX request for which halls are open
         // Using the eatery module, find out which ones are open given the time
@@ -61,6 +63,23 @@ module.exports.start_server = function(eatery_object) {
             res.end();
           })
           .catch(console.error);
+
+      } else if (fs_path == '/closest') {
+        // Requesting the closest dining hall
+        var args = qs.parse(request_parts.query);
+        var evt_data = args.events;
+        var ll = [args.lat, args.lng];
+
+        // Ask the Closest module which place is closest
+        closest.closest(JSON.parse(evt_data), ll)
+          .then(function (c) {
+            // Received a result, send it back to the client
+            res.writeHead(200);
+            res.write(JSON.stringify(c));
+            res.end();
+          })
+          .catch(console.error);
+
       } else {
         // File doesn't exist and request is not a query for eatery info
         // So redirect to index page

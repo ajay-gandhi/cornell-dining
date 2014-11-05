@@ -1,6 +1,11 @@
+/**
+ * This module controls the server itself, including dynamic and static data.
+ */
+
 var http = require('http'),
     fs   = require('fs'),
-    url  = require('url');
+    url  = require('url'),
+    qs   = require('querystring');
 
 // Thanks to B T for contributing to this web server code
 // http://stackoverflow.com/a/26354478/1211985
@@ -9,18 +14,20 @@ var this_server;
 /**
  * Starts an http server. Given the data object, matches the input paths to
  *   the object and outputs data based on that object
- * Requires: An object mapping paths to data
+ * Requires: An instance of the eatery module
  */
-module.exports.start_server = function(data) {
-  // Save the server as a local var so we can edit it later
+module.exports.start_server = function(eatery_object) {
+  // Save the server as a local var so we do things with it later
   this_server = http.createServer(function (req, res) {
     // Get the requested path
     var request_parts = url.parse(req.url);
+    console.log(request_parts);
     var fs_path = request_parts.pathname;
 
-    console.log('Received request:');
-    console.log(fs_path);
-    console.log();
+    // Log some basic info
+    // console.log('Received request:');
+    // console.log(fs_path);
+    // console.log();
 
     // If path is root, set it to index
     fs_path = (fs_path == '/' || fs_path == '') ? '/index.html' : fs_path;
@@ -36,17 +43,28 @@ module.exports.start_server = function(data) {
             res.end();
           }
 
-          res.write(file, 'utf8');
+          res.write(file);
           res.end();
         });
-      } else if (data[fs_path.substr(1)] != undefined) {
-        res.writeHead(200);
-        console.log(data);
-        res.write(JSON.stringify(data[fs_path.substr(1)]));
-        res.end();
+      } else if (fs_path == '/open') {
+        // This is the AJAX request for which halls are open
+        // Using the eatery module, find out which ones are open given the time
+
+        // First get the time in ms from the query and convert it to a date obj
+        var local_ms = qs.parse(request_parts.query).localTime;
+        var local_time = new Date(parseInt(local_ms));
+
+        // // Pass it to the eatery module to get which places are open
+        eatery_object.are_open(local_time, true)
+          .then(function (results) {
+            res.writeHead(200);
+            res.write(JSON.stringify(results));
+            res.end();
+          })
+          .catch(console.error);
       } else {
-        // File doesn't exist and inputted data object doesn't contain
-        // reference, redirect to index page
+        // File doesn't exist and request is not a query for eatery info
+        // So redirect to index page
         res.writeHead(302, {
           'Location': '/index.html'
         });
@@ -55,5 +73,6 @@ module.exports.start_server = function(data) {
     });
   });
 
+  console.log('Listening on port 8080.');
   this_server.listen(8080);
 }

@@ -384,7 +384,6 @@ module.exports = (function () {
     return_obj.building = self.constants.buildings[n];
     return_obj.payment  = self.constants.payments[n];
 
-    console.log(return_obj);
     return return_obj;
   }
 

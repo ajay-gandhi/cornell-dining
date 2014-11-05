@@ -30,10 +30,9 @@ $(document).ready(function() {
       // Start adding the markers asap, they should be there when the cover
       // disappears
       var halls = JSON.parse(data);
-      console.log(data);
       $.each(halls, function (name, hall) {
-        console.log(name, hall);
-        add_marker(name, hall);
+        var new_marker = add_marker(name, hall);
+        add_infowindow(hall, new_marker, name);
       });
 
       // Received the data! Do some animations and then display the good stuff
@@ -58,8 +57,9 @@ $(document).ready(function() {
 
 /**
  * Adds a marker to a Google Maps map by parsing a given object
- * Requires: [String] n - The `ugly` name of the eatery
+ * Requires: [String] n - The name of the eatery
  *           [Object] e - An object containing information about the marker
+ * Returns: [Google Maps marker] The newly created marker
  */
 var add_marker = function (n, e) {
   // Get the lat and long
@@ -72,4 +72,66 @@ var add_marker = function (n, e) {
     position: loc
   });
   markers.push(marker);
+
+  return marker;
 }
+
+/**
+ * Adds an infowindow to a Google Maps marker
+ * Requires: [Object] e - An object containing data to put in the infowindow
+ *           [Google Maps marker] m - A Google Maps marker
+ *           [String] n - The name of the eatery
+ */
+var add_infowindow = function (e, m, n) {
+  // The HTML content of the infowindow
+  var contentString = '<div id="content" class="infowindow">'
+    + '<h2>' + prettify_name(n) + '</h2>'
+    + e.summary
+    + '</div>';
+
+  // Create the infowindow and add it to the global array
+  var infowindow = new google.maps.InfoWindow({
+    content: contentString,
+    maxWidth: 300
+  });
+  infowindows.push(infowindow);
+
+  // Click event for the marker associated with this infowindow
+  google.maps.event.addListener(m, 'click', function() {
+    // Close all other infowindows
+    for (var i = 0; i < infowindows.length; i++) {
+      infowindows[i].close();
+    }
+    // Animate the map to the current infowindow
+    var this_position = [m.getPosition().lat(), m.getPosition().lng()];
+    map.panTo(new google.maps.LatLng(this_position[0], this_position[1]));
+
+    // Open the infowindow
+    infowindow.open(map, m);
+  });
+}
+
+/**
+ * Prettifies dining hall names
+ * Requires: [String] n - The ugly name of the dining hall
+ * Returns: [String] A more readable version of the name
+ */
+var prettify_name = function (n) {
+  // Replace underscores with spaces and capitalize first letter of words
+  n = n
+    .replace(/_/g, ' ')
+    .replace(/(?: |\b)(\w)/g, function(key) {
+      return key.toUpperCase();
+    });
+  // Make first letter uppercase
+  return n.substr(0, 1).toUpperCase() + n.substr(1);
+}
+
+
+
+
+
+
+
+
+

@@ -103,11 +103,19 @@ div#loading span {
  * Map elements
  */
 div#map-canvas {
-  /*position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;*/
   height: 100%;
+}
+div.infowindow {
+  height: auto;
+  width: auto;
+  max-width: 300px;
+  padding: 2px;
+  white-space: nowrap;
+}
+div.infowindow h2 {
+  font-size: 20px;
+  font-weight: bold;
+  padding-bottom: 5px;
 }
 
 

@@ -2,6 +2,8 @@ var map,
     markers = [],
     infowindows = [];
 
+var user_marker;
+
 // Load the Google Maps map
 function initialize() {
   // Center the map on Ithaca zoomed into Cornell's campus
@@ -56,7 +58,7 @@ $(document).ready(function() {
             $('div#where')
               // Hide it first
               .css({
-                bottom: '-100px',
+                bottom: '-110px',
                 left: ($(window).width() / 2) - 100
               })
               // Slide it up
@@ -68,11 +70,7 @@ $(document).ready(function() {
                 find_closest(data);
 
                 $(this).animate({
-                  bottom: '-100px'
-                }, {
-                  complete: function () {
-                    $(this).remove();
-                  }
+                  bottom: '-110px'
                 });
               });
           }
@@ -94,7 +92,7 @@ var add_marker = function (n, e) {
   // Create and add the marker to the map with a drop animation
   var marker = new google.maps.Marker({
     map:      map,
-    title:    n,
+    title:    prettify_name(n),
     position: loc
   });
   markers.push(marker);
@@ -159,9 +157,12 @@ var prettify_name = function (n) {
 /**
  * Display a temporary notification at the top of the screen
  * Requires: [String] msg   - The content of the notification
- *           [int] duration - The duration of the notification in ms
+ *           [int] duration - The duration of the notification in ms. If the
+ *             duration is negative, the notification will never remove itself
+ *           [function] callback - A function that is called when the
+ *             notification disappears, either by user interaction or timeout
  */
-var notify = function (msg, duration) {
+var notify = function (msg, duration, callback) {
   // Create a unique id for the notification
   var id = Math.floor((Math.random() * 10000) + 1).toString();
 
@@ -177,7 +178,7 @@ var notify = function (msg, duration) {
 
   // Remove the notification if it is clicked
   $('div#notification-' + id).click(function() {
-    removeNotification(id);
+    remove_notification(id, callback);
   });
 
   // Slide the notification down
@@ -186,10 +187,12 @@ var notify = function (msg, duration) {
   }, {
     duration: 1000,
     complete: function() {
-      // Remove the notification after the given duration
-      setTimeout(function() {
-        removeNotification(id);
-      }, duration);
+      if (duration > 0) {
+        // Remove the notification after the given duration
+        setTimeout(function() {
+          remove_notification(id, callback);
+        }, duration);
+      }
     }
   });
 }
@@ -197,8 +200,9 @@ var notify = function (msg, duration) {
 /**
  * Removes the notification associated with the given id
  * Requires: [String] id - The unique id of the notification
+ *           [function] callback - A function to call after the notif is gone
  */
-var remove_notification = function (id) {
+var remove_notification = function (id, callback) {
   if ($('div#notification-wrapper-' + id).length != 0) {
     $('div#notification-wrapper-' + id).animate({
       top: '-100px'
@@ -206,6 +210,7 @@ var remove_notification = function (id) {
       duration: 1000,
       complete: function() {
         $(this).remove();
+        callback();
       }
     });
   }
@@ -220,6 +225,27 @@ var remove_notification = function (id) {
 var find_closest = function (data) {
   // Ask for the user's location
   navigator.geolocation.getCurrentPosition(function (position) {
+    // Add a marker representing the user's location
+    var pos = new google.maps.LatLng(
+      position.coords.latitude,
+      position.coords.longitude
+    );
+    var image = 'images/current.png';
+    if (user_marker) {
+      // The marker already exists, just update its location
+      user_marker.setPosition(pos);
+
+    } else {
+      // Create the marker on the map
+      user_marker = new google.maps.Marker({
+        position: pos,
+        map: map,
+        title: 'My Location',
+        icon: image,
+        zIndex: 0
+      });
+    }
+
     // Got the position, now query the server for closest eatery
     // Pass the user's location and the currently open places
     $.ajax({
@@ -232,13 +258,20 @@ var find_closest = function (data) {
     }).done(function (c) {
       // c is the nearest dining hall, notify the user
       c = JSON.parse(c);
-      var notif_msg = prettify_name(c.name) + ' is the only '
+      var notif_msg = prettify_name(c.name) + ' is only '
         + c.distance + ' away.';
-      notify(notif_msg);
+      notify(notif_msg, -1, function () {
+        markers.forEach(function (marker) {
+          marker.setAnimation(null);
+        });
+        $('div#where').animate({
+          bottom: '0px'
+        });
+      });
 
       // Animate the marker associated with the closest eatery
       markers.forEach(function (marker) {
-        if (marker.getTitle() == c.name) {
+        if (marker.getTitle() == prettify_name(c.name)) {
           marker.setAnimation(google.maps.Animation.BOUNCE);
         }
       });
@@ -250,9 +283,3 @@ var find_closest = function (data) {
     }
   });
 }
-
-
-
-
-
-

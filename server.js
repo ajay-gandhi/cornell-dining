@@ -37,8 +37,8 @@ module.exports.start_server = function(eatery_object) {
       if (exists) {
         // The file exists on the server, so serve it up
         res.writeHead(200);
-        fs.readFile('html' + fs_path, 'utf8', function (err, file) {
-          if (err) {        
+        fs.readFile('html' + fs_path, function (err, file) {
+          if (err) {
             console.log(err);
             res.end();
           }

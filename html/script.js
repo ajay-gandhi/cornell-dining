@@ -19,29 +19,40 @@ $(document).ready(function() {
     url: 'open',
     data: { localTime: new Date().getTime() }
   }).done(function (data) {
-    // Start adding the markers asap, they should be there when the cover
-    // disappears
-    var halls = JSON.parse(data);
-    $.each(halls, function (name, hall) {
-      add_marker(name, hall);
-    });
-
-    // Received the data! Do some animations and then display the good stuff
-    $('div#loading-wrapper')
-      .css({
-        width:  $(window).width() + 'px',
-        height: $(window).height() + 'px'
-      })
-      .delay(500)
-      .animate({
-        top: '-' + ($(window).height() + 100)
-      }, {
-        duration: ($(window).height() * 2),
-        complete: function() {
-          // Remove the cover from the page
-          $(this).remove();
-        }
+    if (data.trim() == '{}') {
+      // All dining halls are closed right now
+      $('div#map-canvas').remove();
+      $('div#loading h2').text('all eateries are closed right now');
+      $('div#loading span').fadeTo('normal', 0, function () {
+        $(this).remove();
       });
+    } else {
+      // Start adding the markers asap, they should be there when the cover
+      // disappears
+      var halls = JSON.parse(data);
+      console.log(data);
+      $.each(halls, function (name, hall) {
+        console.log(name, hall);
+        add_marker(name, hall);
+      });
+
+      // Received the data! Do some animations and then display the good stuff
+      $('div#loading-wrapper')
+        .css({
+          width:  $(window).width() + 'px',
+          height: $(window).height() + 'px'
+        })
+        .delay(500)
+        .animate({
+          top: '-' + ($(window).height() + 100)
+        }, {
+          duration: ($(window).height() * 2),
+          complete: function() {
+            // Remove the cover from the page
+            $(this).remove();
+          }
+        });
+      }
   });
 });
 
@@ -61,37 +72,4 @@ var add_marker = function (n, e) {
     position: loc
   });
   markers.push(marker);
-
-  // Now the info window
-  // This contains the actual HTML content of the window
-  var contentString = '<div id="content">'+
-    '<div id="siteNotice">'+
-    '</div>'+
-    '<h1 id="firstHeading" class="firstHeading">Uluru</h1>'+
-    '<div id="bodyContent">'+
-    '<p><b>Uluru</b>, also referred to as <b>Ayers Rock</b>, is a large ' +
-    'sandstone rock formation in the southern part of the '+
-    'Northern Territory, central Australia. It lies 335&#160;km (208&#160;mi) '+
-    'south west of the nearest large town, Alice Springs; 450&#160;km '+
-    '(280&#160;mi) by road. Kata Tjuta and Uluru are the two major '+
-    'features of the Uluru - Kata Tjuta National Park. Uluru is '+
-    'sacred to the Pitjantjatjara and Yankunytjatjara, the '+
-    'Aboriginal people of the area. It has many springs, waterholes, '+
-    'rock caves and ancient paintings. Uluru is listed as a World '+
-    'Heritage Site.</p>'+
-    '</div>'+
-    '</div>';
-
-  // Create the window itself
-  var infowindow = new google.maps.InfoWindow({
-    content: contentString,
-    maxWidth: 300
-  });
-
-  // Display the infowindow when a marker is clicked
-  google.maps.event.addListener(marker, 'click', function() {
-    infowindow.open(map, marker);
-  });
-
-  infowindows.push(infowindow);
 }

@@ -66,6 +66,7 @@ $(document).ready(function() {
               // Slide it down on click and find the closest place
               .click(function () {
                 find_closest(data);
+
                 $(this).animate({
                   bottom: '-100px'
                 }, {
@@ -210,6 +211,12 @@ var remove_notification = function (id) {
   }
 }
 
+/**
+ * Given the list of which eateries are currently open, finds the closest one
+ * Requires: [Object] data - A mapping of eatery names to their relevant data
+ * Returns: [Object] An object containing the same eatery data that was inputted
+ *   for the closest eatery, along with a summary of how far it is
+ */
 var find_closest = function (data) {
   // Ask for the user's location
   navigator.geolocation.getCurrentPosition(function (position) {

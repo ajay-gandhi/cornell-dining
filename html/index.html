@@ -6,44 +6,7 @@
   <title>Cornell Dining</title>
   <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
   <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC9yloXUk_-YFzljzoN1ee3Cu3YcXi0B7c"></script>
-  <script type="text/javascript">
-  // Load the Google Maps map
-  function initialize() {
-    var mapOptions = {
-      center: { lat: 42.449856, lng: -76.481946 },
-      zoom: 15
-    };
-    var map = new google.maps.Map(document.getElementById('map-canvas'),
-        mapOptions);
-  }
-  google.maps.event.addDomListener(window, 'load', initialize);
-
-  $(document).ready(function() {
-    // Make an AJAX query to the server, providing the local time
-    $.ajax({
-      url: 'open',
-      data: { localTime: new Date().getTime() }
-    }).done(function (data) {
-      // Received the data! Do some animations and then display the good stuff
-      $('div#loading-wrapper')
-        .css({
-          width:  $(window).width() + 'px',
-          height: $(window).height() + 'px'
-        })
-        .delay(500)
-        .animate({
-          top: '-' + ($(window).height() + 100)
-        }, {
-          duration: ($(window).height() * 2),
-          complete: function() {
-            // Remove the cover
-            $(this).remove();
-            console.log(data);
-          }
-        });
-    });
-  });
-  </script>
+  <script type="text/javascript" src="script.js"></script>
 </head>
 <body>
   <div id="loading-wrapper">

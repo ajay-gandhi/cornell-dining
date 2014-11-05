@@ -21,13 +21,12 @@ module.exports.start_server = function(eatery_object) {
   this_server = http.createServer(function (req, res) {
     // Get the requested path
     var request_parts = url.parse(req.url);
-    console.log(request_parts);
     var fs_path = request_parts.pathname;
 
     // Log some basic info
-    // console.log('Received request:');
-    // console.log(fs_path);
-    // console.log();
+    console.log('Received request:');
+    console.log(request_parts.path);
+    console.log();
 
     // If path is root, set it to index
     fs_path = (fs_path == '/' || fs_path == '') ? '/index.html' : fs_path;

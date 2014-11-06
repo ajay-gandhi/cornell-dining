@@ -197,7 +197,7 @@ var notify = function (msg, duration, callback) {
   });
 
   // Return the id so that a notification can be closed in some other fashion
-  return id;
+  // return id;
 }
 
 /**

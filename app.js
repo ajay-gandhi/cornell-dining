@@ -1,5 +1,4 @@
-var request  = require('request'),
-    Promise  = require('es6-promise').Promise,
+var Promise  = require('es6-promise').Promise,
     Eateries = require('./eatery'),
     server   = require('./server');
 

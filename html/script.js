@@ -33,10 +33,16 @@ $(document).ready(function() {
       // Start adding the markers asap, they should be there when the cover
       // disappears
       var halls = JSON.parse(data);
-      $.each(halls, function (name, hall) {
-        var new_marker = add_marker(name, hall);
-        add_infowindow(hall, new_marker, name);
-      });
+      var index = 0;
+      setTimeout(function () {
+        $.each(halls, function (name, hall) {
+          index++;
+          setTimeout(function () {
+            var new_marker = add_marker(name, hall);
+            add_infowindow(hall, new_marker, name);
+          }, index * 50);
+        });
+      }, 1000);
 
       // Append the closest eatery button
       $('body').append('<div id="where">Find<br />me a place<br />to eat!</div>');
@@ -76,6 +82,7 @@ var add_marker = function (n, e) {
   var marker = new google.maps.Marker({
     map:      map,
     title:    prettify_name(n),
+    animation: google.maps.Animation.DROP,
     position: loc
   });
   markers.push(marker);
@@ -190,7 +197,7 @@ var notify = function (msg, duration, callback) {
  */
 var remove_notification = function (id, callback) {
   if ($('div#notification-wrapper-' + id).length != 0) {
-    $('div#notification-wrapper-' + id).animate({
+    $('div#notification-wrapper-' + id).stop().animate({
       top: '-100px'
     }, {
       duration: 1000,

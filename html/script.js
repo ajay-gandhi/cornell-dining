@@ -16,18 +16,19 @@ function initialize() {
 google.maps.event.addDomListener(window, 'load', initialize);
 
 $(document).ready(function() {
+  var finding_opens = notify('Finding open places...', -1);
   // Make an AJAX query to the server, providing the local time in ms
   $.ajax({
     url: 'open',
     data: { localTime: new Date().getTime() }
   }).done(function (data) {
+    // Remove the loader notification
+    remove_notification(finding_opens);
+
     if (data.trim() == '{}') {
       // All dining halls are closed right now
-      $('div#map-canvas').remove();
-      $('div#loading h2').text('all eateries are closed right now');
-      $('div#loading span').fadeTo('normal', 0, function () {
-        $(this).remove();
-      });
+      notify('Everything is closed. Sorry!', -1);
+
     } else {
       // Start adding the markers asap, they should be there when the cover
       // disappears
@@ -37,45 +38,27 @@ $(document).ready(function() {
         add_infowindow(hall, new_marker, name);
       });
 
-      // Received the data! Do some animations and then display the good stuff
-      $('div#loading-wrapper')
+      // Append the closest eatery button
+      $('body').append('<div id="where">Find<br />me a place<br />to eat!</div>');
+      $('div#where')
+        // Hide it first
         .css({
-          width:  $(window).width() + 'px',
-          height: $(window).height() + 'px'
+          bottom: '-110px',
+          left: ($(window).width() / 2) - 100
         })
-        .delay(500)
+        // Slide it up
         .animate({
-          top: '-' + ($(window).height() + 100)
-        }, {
-          duration: ($(window).height() * 2),
-          complete: function() {
-            // Remove the cover from the page
-            $(this).remove();
+          bottom: '0px'
+        })
+        // Slide it down on click and find the closest place
+        .click(function () {
+          find_closest(data);
 
-            // Append the closest eatery button
-            // $('body').append('<div id="where">Where<br />should<br />I eat?</div>');
-            $('body').append('<div id="where">Find<br />me a place<br />to eat!</div>');
-            $('div#where')
-              // Hide it first
-              .css({
-                bottom: '-110px',
-                left: ($(window).width() / 2) - 100
-              })
-              // Slide it up
-              .animate({
-                bottom: '0px'
-              })
-              // Slide it down on click and find the closest place
-              .click(function () {
-                find_closest(data);
-
-                $(this).animate({
-                  bottom: '-110px'
-                });
-              });
-          }
+          $(this).animate({
+            bottom: '-110px'
+          });
         });
-      }
+    }
   });
 });
 
@@ -197,7 +180,7 @@ var notify = function (msg, duration, callback) {
   });
 
   // Return the id so that a notification can be closed in some other fashion
-  // return id;
+  return id;
 }
 
 /**

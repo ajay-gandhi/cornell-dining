@@ -194,6 +194,7 @@ module.exports = (function () {
     var self = this;
 
     return new Promise(function (resolve, reject) {
+      console.log(currently);
       var answer = false;
 
       // Loop through all the events
@@ -222,6 +223,7 @@ module.exports = (function () {
               if (elm.rrule.weekdays.split(',').indexOf(dow) >= 0
                 && start_time.getTime() <= currently.getTime()
                 && currently.getTime()  <= last_time.getTime()) {
+
                 if (elm.rexcept) {
                   // The event contains a parameter defining exceptions to the
                   // repeat rule. We need to ensure that the given date does not
@@ -411,18 +413,19 @@ module.exports = (function () {
  * Returns: [Date] A Date object representing the given time
  */
 var parse_time = function(time, ref) {
-  // Google Calendar returns time in one of two formats
-  // One is acceptable by the Date() constructor
-  if (time.indexOf(':') == -1) {
-    // time does not have :
-    ref  = ref.substr(-5, 5);
-    time = time.substr(0, 4)
-      + '-' + time.substr(4, 2)
-      + '-' + time.substr(6, 5)
-      + ':' + time.substr(11, 2)
-      + ':' + time.substr(13, 2)
-      + ref;
-  }
+  // // Google Calendar returns time in one of two formats
+  // // One is acceptable by the Date() constructor
+  // if (time.indexOf(':') == -1) {
+  //   // time does not have :
+  //   ref  = ref.substr(-5, 5);
+  //   time = time.substr(0, 4)
+  //     + '-' + time.substr(4, 2)
+  //     + '-' + time.substr(6, 5)
+  //     + ':' + time.substr(11, 2)
+  //     + ':' + time.substr(13, 2)
+  //     + ref;
+  // }
+  // return new Date(time);
   return new Date(time);
 }
 
@@ -434,8 +437,8 @@ var parse_time = function(time, ref) {
  *   week represented by the given Date object
  */
 var day_of_week = function(date_obj) {
-  var days = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'];
-  return days[date_obj.getUTCDay()];
+  var days = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
+  return days[date_obj.getDay()];
 }
 
 /**

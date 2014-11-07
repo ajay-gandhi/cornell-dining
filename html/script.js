@@ -4,6 +4,13 @@ var map,
 
 var user_marker;
 
+var today = new Date();
+var time = {
+    min:   today.getMinutes(),
+    hour: (today.getHours() % 12),
+    ap: (today.getHours() >= 12) ? 'pm' : 'am'
+}
+
 // Load the Google Maps map
 function initialize() {
   // Center the map on Ithaca zoomed into Cornell's campus
@@ -15,12 +22,12 @@ function initialize() {
 }
 google.maps.event.addDomListener(window, 'load', initialize);
 
-$(document).ready(function() {
+$(document).ready(function () {
   var finding_opens = notify('Finding open places...', -1);
   // Make an AJAX query to the server, providing the local time in ms
   $.ajax({
     url: 'open',
-    data: { localTime: new Date().getTime() }
+    data: { localTime: today.getTime() }
   }).done(function (data) {
     // Remove the loader notification
     remove_notification(finding_opens);
@@ -65,6 +72,146 @@ $(document).ready(function() {
           });
         });
     }
+  });
+
+  // Set the value to current time
+  update_input();
+
+  // Click events for the increment and decrement buttons
+  $('button#up').click(function () {
+    // The minutes are increasing and > 60, so next hour
+    if (time.min == 59) {
+      time.min = 0;
+      // The hour cannot exceed 12
+      if (time.hour == 12) {
+        time.hour = 1;
+        time.ap = (time.ap == 'am') ? 'pm' : 'am';
+      } else {
+        time.hour = time.hour + 1;
+      }
+    } else {
+      time.min = time.min + 1;
+    }
+    update_input();
+  });
+
+  $('button#down').click(function () {
+    // The minutes are decreasing and < 1, so prev hour
+    if (time.min == 0) {
+      time.min = 59;
+      // The hour cannot be < 1
+      if (time.hour == 1) {
+        time.hour = 12;
+        time.ap = (time.ap == 'am') ? 'pm' : 'am';
+      } else {
+        time.hour = time.hour - 1;
+      }
+    } else {
+      time.min = time.min - 1;
+    }
+    update_input();
+  });
+
+  // They clicked on update
+  $('button#update').click(function () {
+    // Remove any existing markers
+    markers.forEach(function (marker) {
+      marker.setMap(null);
+    });
+    markers = [];
+
+    var inputted_time = $('input#time').val().toString();
+
+    // Attempt to parse what is in the field
+    var time_format = /([0-9]{1,2})((:)?)([0-9]{2})(am|pm)?/;
+    var parts = time_format.exec(inputted_time);
+    parts.shift();
+
+    var hour = parseInt(parts.shift());
+    if (hour <= 24 && hour >= 0) {
+      if (hour >= 13) {
+        time.hour = hour - 12;
+        time.ap = 'pm';
+      } else {
+        time.hour = hour;
+      }
+    }
+
+    parts.shift();
+    parts.shift();
+    var min = parseInt(parts.shift());
+    if (min >= 0 && min <= 59) {
+      time.min = min;
+    }
+
+    var ap = parts.shift();
+    if (ap && (ap === 'am' || ap === 'pm')) {
+      if (time.hour >= 13) {
+        time.hour -= 12;
+      }
+      time.ap = ap;
+    }
+
+    // Update the Date object that will be passed
+    if (time.ap == 'pm') {
+      today.setHours(time.hour + 12);
+    } else {
+      today.setHours(time.hour - 1);
+    }
+    today.setMinutes(time.min);
+
+    // Loading notification
+    var finding_opens = notify('Finding open places...', -1);
+
+    // Make an AJAX query to the server, providing the local time in ms
+    $.ajax({
+      url: 'open',
+      data: { localTime: today.getTime() }
+    }).done(function (data) {
+
+      // Remove the loader notification
+      remove_notification(finding_opens);
+
+      if (data.trim() == '{}') {
+        // All dining halls are closed right now
+        notify('Everything is closed. Sorry!', -1);
+
+      } else {
+        // Start adding the markers asap, they should be there when the cover
+        // disappears
+        var halls = JSON.parse(data);
+        var index = 0;
+        setTimeout(function () {
+          $.each(halls, function (name, hall) {
+            index++;
+            setTimeout(function () {
+              var new_marker = add_marker(name, hall);
+              add_infowindow(hall, new_marker, name);
+            }, index * 50);
+          });
+        }, 1000);
+
+        // Append the closest eatery button
+        $('div#where')
+          // Hide it first
+          .css({
+            bottom: '-110px',
+            left: ($(window).width() / 2) - 100
+          })
+          // Slide it up
+          .animate({
+            bottom: '0px'
+          })
+          // Slide it down on click and find the closest place
+          .click(function () {
+            find_closest(data);
+
+            $(this).animate({
+              bottom: '-110px'
+            });
+          });
+      }
+    });
   });
 });
 
@@ -161,7 +308,7 @@ var notify = function (msg, duration, callback) {
     duration = 6000;
   }
 
-  var new_html = '<div class="notification" id="notification-wrapper-' + id + '">'
+  var new_html = '<div class="notification no-select" id="notification-wrapper-' + id + '">'
     + '<div id="notification-' + id + '">' + msg + '</div>'
     + '</div>';
   $('body').append(new_html);
@@ -203,7 +350,9 @@ var remove_notification = function (id, callback) {
       duration: 1000,
       complete: function() {
         $(this).remove();
-        callback();
+        if (callback) {
+          callback();
+        }
       }
     });
   }
@@ -275,4 +424,19 @@ var find_closest = function (data) {
       notify('Unable to find your location.');
     }
   });
+}
+
+/**
+ * Updates the input text box with the time
+ */
+var update_input = function () {
+  var right_now = time.min.toString();
+  while (right_now.length < 2) {
+      right_now = '0' + right_now;
+  }
+  if (time.hour == 0) {
+    time.hour = 12;
+  }
+  right_now = time.hour + ':' + right_now + time.ap;
+  $('input#time').val(right_now);
 }

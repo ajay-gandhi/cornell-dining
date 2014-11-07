@@ -3,7 +3,8 @@
  */
 
 var express = require('express'),
-    closest = require('./closest');
+    closest = require('./closest'),
+    what    = require('./what');
 
 var app = express();
 
@@ -49,6 +50,19 @@ module.exports.start_server = function(eatery_object) {
         res.send(JSON.stringify(c));
       })
       .catch(console.error);
+  });
+
+  app.get('/menu', function (req, res) {
+    // Requesting the menu
+
+    // Get the hall and meal
+    var hall = req.query.hall;
+    var meal = req.query.meal;
+
+    what.get_menu(meal, hall)
+      .then(function (menu) {
+        res.send(JSON.stringify(menu));
+      });
   });
 
   // Actually start the server

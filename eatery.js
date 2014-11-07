@@ -194,7 +194,6 @@ module.exports = (function () {
     var self = this;
 
     return new Promise(function (resolve, reject) {
-      console.log(currently);
       var answer = false;
 
       // Loop through all the events

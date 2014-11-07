@@ -1,6 +1,6 @@
 {
   "name": "cornell-dining",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "A fast, user-friendly interface for finding a place to eat at Cornell University",
   "main": "app.js",
   "dependencies": {

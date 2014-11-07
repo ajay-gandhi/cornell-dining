@@ -124,21 +124,16 @@ div.infowindow h2 {
 div.notification {
   position: fixed;
   width: 100%;
-  top: -100px;
-  left: 50%;
+  height: 20px;
+  padding: 10px 0px;
+  top: -60px;
+  left: 0;
   z-index: 1000;
-}
-div.notification div {
   cursor: pointer;
   color: #ffffff;
   font-size: 18px;
   font-family: "Helvetica Neue", Helvetica, Arial;
-  position: relative;
-  left: -50%;
   text-align: center;
-  height: 20px;
-  width: 100%;
-  padding: 13px;
   background-color: #5fc297;
   -moz-box-shadow: 0px 0px 10px #000000;
   -webkit-box-shadow: 0px 0px 10px #000000;
@@ -151,16 +146,15 @@ div#where {
   font-family: "Helvetica Neue", Helvetica, Arial;
   line-height: 1.2em;
   text-align: center;
-  height: 90px;
-  width: 200px;
-  padding-top: 10px;
+  padding: 5px;
+  height: 60px;
+  width: 150px;
   position: fixed;
-  bottom: -110px;
-  left: 50%;
+  bottom: 15px;
+  left: 15px;
   z-index: 999;
   background-color: #5fc297;
-  border-top-left-radius: 100px;
-  border-top-right-radius: 100px;
+  border-radius: 10px;
   -moz-box-shadow: 0px 0px 10px #000000;
   -webkit-box-shadow: 0px 0px 10px #000000;
   box-shadow: 0px 0px 10px #000000;
@@ -170,6 +164,7 @@ div#where {
  * Time input
  */
 div#time-wrapper {
+  background-color: #5fc297;
   position: fixed;
   bottom: 15px;
   right: 15px;
@@ -178,6 +173,9 @@ div#time-wrapper {
   border-radius: 5px 5px 5px;
   padding: 5px;
   width: 112px;
+  -moz-box-shadow: 0px 0px 10px #000000;
+  -webkit-box-shadow: 0px 0px 10px #000000;
+  box-shadow: 0px 0px 10px #000000;
 }
 
 div#left {
@@ -193,7 +191,7 @@ input#time {
   margin-bottom: 5px;
   text-align: right;
 }
-button#go {
+button#update {
   font-size: 16px;
   height: 30px;
   width: 71px;
@@ -214,6 +212,10 @@ div#change button {
   width: 25px;
   height: 25px;
   font-size: 16px;
+  font-weight: bold;
   text-align: center;
+  background-color: #ffffff;
+  border: 1px solid black;
+  border-radius: 5px;
   cursor: pointer;
 }

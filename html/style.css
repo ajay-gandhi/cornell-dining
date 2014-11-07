@@ -108,7 +108,7 @@ div#map-canvas {
 div.infowindow {
   height: auto;
   width: auto;
-  max-width: 300px;
+  max-width: 350px;
   padding: 2px;
   white-space: nowrap;
 }

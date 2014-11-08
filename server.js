@@ -4,7 +4,7 @@
 
 var express = require('express'),
     closest = require('./closest'),
-    what    = require('./what');
+    what    = require('./menu');
 
 var app = express();
 

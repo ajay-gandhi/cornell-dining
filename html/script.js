@@ -62,8 +62,7 @@ $(document).ready(function () {
       }, 500);
 
       // Append the closest eatery button
-      $('body').append('<div id="where">Find me a<br />place to eat!</div>');
-      $('div#where')
+      $('div#where, div#where-background')
         // Hide it first
         .css({
           bottom: '-100px'
@@ -79,58 +78,28 @@ $(document).ready(function () {
           $(this).animate({
             bottom: '-100px'
           });
+          $('div#where-background').animate({
+            bottom: '-100px'
+          });
         });
     }
+  });
+
+  // Click event to close menu tool
+  $('a#close-menu-tool').click(function (e) {
+    e.preventDefault();
+    $('div#menu-tool-wrapper').animate({
+      top: '-' + $('div#menu-tool-wrapper').outerHeight()
+    });
   });
 
   // Set the input to local time
   update_input();
 
-  // Click events for the time increment and decrement buttons
-  $('button#up').click(function () {
-    // The minutes are increasing and > 60, so next hour
-    if (time.min == 59) {
-      time.min = 0;
-      // The hour cannot exceed 12
-      if (time.hour == 12) {
-        time.hour = 1;
-      } else {
-        time.hour = time.hour + 1;
-      }
-
-      // If the hour went from 11 -> 12, toggle am/pm
-      if (time.hour == 12) {
-        time.ap = (time.ap == 'am') ? 'pm' : 'am';
-      }
-    } else {
-      time.min = time.min + 1;
+  $('input#min').change(function () {
+    while ($('input#min').val().length < 2) {
+      $('input#min').val( '0' + $('input#min').val() );
     }
-
-    // Update the input box
-    update_input();
-  });
-
-  $('button#down').click(function () {
-    // The minutes are decreasing and < 1, so prev hour
-    if (time.min == 0) {
-      time.min = 59;
-      // The hour cannot be < 1
-      if (time.hour == 1) {
-        time.hour = 12;
-      } else {
-        time.hour = time.hour - 1;
-      }
-
-      // If the hour went from 12 -> 11, toggle am/pm
-      if (time.hour == 11) {
-        time.ap = (time.ap == 'am') ? 'pm' : 'am';
-      }
-    } else {
-      time.min = time.min - 1;
-    }
-
-    // Update the input box
-    update_input();
   });
 
   // They clicked on update
@@ -142,53 +111,22 @@ $(document).ready(function () {
     markers = [];
 
     // Hide the closest place button
-    $('div#where').animate({
+    $('div#where, div#where-background').animate({
       bottom: '-100px'
     });
 
-    // Attempt to parse what is in the time input field
-    var inputted_time = $('input#time').val().toString();
-    var time_format = /([0-9]{1,2})((:)?)([0-9]{2})(am|pm)?/;
-    var parts = time_format.exec(inputted_time);
-
-    // First elem of parts is the entire string, don't need that
-    parts.shift();
-
-    // Try to parse the hour, which is the first piece
-    var hour = parseInt(parts.shift());
-    if (hour <= 24 && hour >= 0) {
-      // The hour is valid
-      if (hour >= 13) {
-        // We want to maintain am/pm instead of 0-23 hours
-        time.hour = hour - 12;
-        time.ap = 'pm';
-      } else if (hour == 0) {
-        time.hour = 12;
-        time.ap = 'am';
-      } else {
-        time.hour = hour;
-        time.ap = 'am';
-      }
+    // Parse the inputs
+    var inp_hour = parseInt($('input#hour').val());
+    if (inp_hour <= 12 && inp_hour >= 1) {
+      time.hour = inp_hour;
     }
 
-    // The next two elements are the `:` separator
-    parts.shift();
-    parts.shift();
-
-    // Try to parse the minutes
-    var min = parseInt(parts.shift());
-    if (min >= 0 && min <= 59) {
-      // The minute is valid
-      time.min = min;
+    var inp_min = parseInt($('input#min').val());
+    if (inp_min <= 59 && inp_min >= 1) {
+      time.min = inp_min;
     }
 
-    // Try to parse am/pm
-    var ap = parts.shift().toLowerCase();
-    if (ap === 'am' || ap === 'pm') {
-      // The am/pm is valid
-      time.ap = ap;
-    }
-    update_input();
+    time.ap = $('select#ampm').val();
 
     // Update the Date object that will be passed
     if (time.ap == 'pm' && time.hour != 12) {
@@ -198,7 +136,17 @@ $(document).ready(function () {
     }
     today.setMinutes(time.min);
 
-    // Loading notification
+    // Remove any existing notifications
+    $('div.notification').each(function () {
+      $(this).animate({
+        top: '-60px'
+      }, {
+        complete: function () {
+          $(this).remove();
+        }
+      });
+    });
+    // Open a new loading notification
     var finding_opens = notify('Finding open places...', -1);
 
     // Make an AJAX query to the server, providing the local time in ms
@@ -230,7 +178,7 @@ $(document).ready(function () {
         }, 1000);
 
         // Append the closest eatery button
-        $('div#where')
+        $('div#where, div#where-background')
           .stop()
           // Slide it up
           .animate({
@@ -248,6 +196,9 @@ $(document).ready(function () {
     });
   });
 });
+
+
+/****************************** Local Functions *******************************/
 
 /**
  * Adds a marker to a Google Maps map by parsing a given object
@@ -278,11 +229,29 @@ var add_marker = function (n, e) {
  *           [String] n - The name of the eatery
  */
 var add_infowindow = function (e, m, n) {
-  // The HTML content of the infowindow
+  // First check if the place is All You Can Eat or BRBs
+  var hall_ids = [
+    'cook_house_dining_room',
+    'becker_house_dining_room',
+    'keeton_house_dining_room',
+    'rose_house_dining_room',
+    'jansens_dining_room,_bethe_house',
+    'robert_purcell_marketplace_eatery',
+    'north_star',
+    'risley_dining',
+    '104west',
+    'okenshields'
+  ];
+  var is_brb = (hall_ids.indexOf(n) == -1) ? true : false;
+
   var contentString = '<div id="content" class="infowindow">'
     + '<h2>' + prettify_name(n) + '</h2>'
-    + e.summary
-    + '</div>';
+    + '<div class="summary">' + e.summary + '</div>';
+  if (!is_brb) {
+    contentString += '<div class="menu" id="' + n +
+      '">What\'s there to eat?</div>';
+  }
+  contentString += '</div>';
 
   // Create the infowindow and add it to the global array
   var infowindow = new google.maps.InfoWindow({
@@ -306,6 +275,11 @@ var add_infowindow = function (e, m, n) {
 
     // Open the infowindow
     infowindow.open(map, m);
+
+    // Click event for menu
+    $('div.infowindow div.menu').click(function () {
+      find_menu(n);
+    });
   });
 }
 
@@ -343,7 +317,8 @@ var notify = function (msg, duration, callback) {
   }
 
   var new_html = '<div class="notification no-select" id="notification-' + id
-    + '">' + msg + '</div>';
+    + '"><div class="notification-message">' + msg + '</div>'
+    + '<div class="notification-background"></div></div>';
   $('body').append(new_html);
 
   // Remove the notification if it is clicked
@@ -439,7 +414,7 @@ var find_closest = function (data) {
         markers.forEach(function (marker) {
           marker.setAnimation(null);
         });
-        $('div#where').animate({
+        $('div#where, div#where-background').animate({
           bottom: '15px'
         });
       });
@@ -460,13 +435,60 @@ var find_closest = function (data) {
 }
 
 /**
+ * Gets the menu for the given dining hall at the current time object and
+ *   displays it
+ * Requires: [String] name - The name of the dining hall
+ */
+var find_menu = function (name) {
+  var finding_menu = notify('Getting the menu...', -1);
+
+  $.ajax({
+    url: 'menu',
+    data: {
+      hall: name,
+      time: today.getTime()
+    }
+  }).done(function (c) {
+    // Remove loading notification
+    if ($('div#notification-' + finding_menu).length == 0) {
+      // Set the content
+      $('div#menu-content').text(JSON.stringify(c));
+      // Slide it down
+      $('div#menu-tool-wrapper').animate({
+        top: '15px'
+      });
+    } else {
+      remove_notification(finding_menu, function () {
+        // Set the content
+        $('div#menu-content').text(JSON.stringify(c));
+        // Ensure that the menu background matches the menu itself
+        $('div#menu-background').css({
+          margin: '0',
+          padding: '10px',
+          width:  $('div#menu-tool').width(),
+          height: $('div#menu-tool').height()
+        });
+        // Slide it down
+        $('div#menu-tool-wrapper').animate({
+          top: '15px'
+        });
+      });
+    }
+  });
+}
+
+/**
  * Updates the input text box with the time
  */
 var update_input = function () {
+  $('input#hour').val(time.hour);
+
+  // Ensure preceding 0s for minute
   var right_now = time.min.toString();
   while (right_now.length < 2) {
       right_now = '0' + right_now;
   }
-  right_now = time.hour + ':' + right_now + time.ap;
-  $('input#time').val(right_now);
+  $('input#min').val(right_now);
+
+  $('select#ampm').val(time.ap)
 }

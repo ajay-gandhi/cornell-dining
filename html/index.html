@@ -10,17 +10,28 @@
 </head>
 <body>
   <div id="map-canvas" class="no-select"></div>
+  <div id="where">Find me a<br />place to eat!</div>
+  <div id="where-background"></div>
 
-  <div id="time-wrapper">
-    <div id="left">
-      <input type="text" id="time" maxlength="7" autocomplete="off"/><br />
-      <button id="update" class="no-select">Update</button>
-    </div>
-    <div id="change" class="no-select">
-      <button id="up">&and;</button>
-      <button id="down">&or;</button>
+  <div id="menu-tool-wrapper">
+    <div id="menu-background"></div>
+    <div id="menu-tool">
+      <div id="menu-content"></div>
+      <a href="#" id="close-menu-tool">Close</a>
     </div>
   </div>
+
+  <div id="time-wrapper">
+    <input type="number" class="time" id="hour" max="12" min="1" />
+    <span id="separator">:</span>
+    <input type="number" class="time" id="min" max="59" min="1" />
+    <select id="ampm">
+        <option value="am">am</option>
+        <option value="pm">pm</option>
+    </select>
+    <br /><button id="update" class="no-select">Update</button>
+  </div>
+  <div id="time-background"></div>
 </div>
 </body>
 </html>

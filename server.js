@@ -57,9 +57,9 @@ module.exports.start_server = function(eatery_object) {
 
     // Get the hall and meal
     var hall = req.query.hall;
-    var meal = req.query.meal;
+    var time = req.query.time;
 
-    what.get_menu(meal, hall)
+    what.get_menu(time, hall)
       .then(function (menu) {
         res.send(JSON.stringify(menu));
       });

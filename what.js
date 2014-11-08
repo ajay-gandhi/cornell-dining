@@ -14,11 +14,11 @@ var menus_url = 'http://living.sas.cornell.edu/dine/whattoeat/menus.cfm';
 
 /**
  * Fetches the menu for a given dining hall at a given time
- * Requires: [String] meal - The name of the meal being eaten
+ * Requires: [String] time - The time in ms of the meal being eaten
  *           [String] name - The name of the dining hall
  * Returns: [Object] The menu for the dining hall
  */
-module.exports.get_menu = function (meal, name) {
+module.exports.get_menu = function (time, name) {
   return new Promise(function (resolve, reject) {
     var menu = [];
 
@@ -39,7 +39,7 @@ module.exports.get_menu = function (meal, name) {
     // Hall ids aren't 0 indexed
     var hall_id = hall_ids.indexOf(name) + 1;
     // Ensure first char of meal is uppercase
-    meal = meal.substr(0, 1).toUpperCase() + meal.substr(1);
+    meal = time_to_meal(new Date(parseInt(time)), name);
 
     // Visit the browser
     browser.visit(menus_url).then(function () {
@@ -49,7 +49,7 @@ module.exports.get_menu = function (meal, name) {
       // Only today for now
       // browser.select('menudates',     day);
 
-      browser.select('menuperiod',    meal);
+      browser.select('menuperiod', meal);
       browser.document.forms[0].submit();
       // Wait for new page to load
       browser.wait()
@@ -100,3 +100,48 @@ module.exports.get_menu = function (meal, name) {
     });
   });
 }
+
+/**
+ * Returns the meal associated with the given dining hall at the given time
+ * Requires: [Date] d   - The date of the meal
+ *           [String] n - The name of the dining hall
+ * Returns: [String] The name of the meal
+ */
+var time_to_meal = function (d, n) {
+  var h = d.getHours();
+  var m = d.getMinutes();
+  var day = d.getDay();
+
+  if (day == 0) {
+    // Today is Sunday
+
+    // These places have lunch not brunch
+    var midday = (n === 'cook_house_dining_room' || n === 'north_star') ?
+      'Lunch' : 'Brunch';
+
+    if (h <= 10) {
+      return 'Breakfast';
+    } else if (h >= 16) {
+      return 'Dinner';
+    } else {
+      return midday;
+    }
+  } else {
+    // Today is Sat or a weekday
+    if (h <= 9 || (h == 10 && m <= 30)) {
+      return 'Breakfast';
+    } else if (h >= 16) {
+      return 'Dinner';
+    } else {
+      return 'Lunch';
+    }
+  }
+}
+
+
+
+
+
+
+
+

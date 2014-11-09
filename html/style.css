@@ -90,13 +90,13 @@ div#loading {
 div#loading h2 {
   color: #ffffff;
   font-size: 40px;
-  font-family: "Helvetica Neue", Helvetica, Arial;
+  font-family: "Roboto", "Helvetica Neue", Helvetica, Arial;
   margin-bottom: 20px;
 }
 div#loading span {
   color: #ffffff;
   font-size: 20px;
-  font-family: "Helvetica Neue", Helvetica, Arial;
+  font-family: "Roboto", "Helvetica Neue", Helvetica, Arial;
 }
 
 /**
@@ -131,8 +131,7 @@ div.infowindow div.menu {
  * Menu tool
  */
 div#menu-tool-wrapper {
-  width: 100%;
-  max-width: 500px;
+  width: 350px;
   height: auto;
   padding: 0px 15px;
   margin: 0 auto;
@@ -165,7 +164,31 @@ div#menu-tool {
   height: 100%;
 }
 div#menu-content {
-  margin: 10px 0px;
+  font-family: "Roboto", "Helvetica Neue", Helvetica, sans;
+  margin-bottom: 10px;
+  max-height: 400px;
+  overflow: auto;
+}
+div#menu-content h2 {
+  margin: 0px 0px 5px 0px;
+  font-weight: bold;
+  font-size: 16px;
+}
+span.item {
+  padding-left: 20px;
+}
+div#close-menu-wrapper {
+    text-align: center;
+}
+button#close-menu-tool {
+    padding: 5px;
+    border: 1px solid black;
+    border-radius: 5px;
+    background-color: #ffffff;
+    color: #000000;
+    font-family: "Roboto", "Helvetica Neue", Helvetica, sans;
+    text-align: center;
+    text-decoration: none;
 }
 
 /**
@@ -191,7 +214,7 @@ div.notification {
   z-index: 1000;
   cursor: pointer;
   font-size: 18px;
-  font-family: "Helvetica Neue", Helvetica, Arial;
+  font-family: "Roboto", "Helvetica Neue", Helvetica, Arial;
   text-align: center;
   border-bottom: 2px solid red;
 }
@@ -215,7 +238,7 @@ div#where-background {
 div#where {
   cursor: pointer;
   font-size: 24px;
-  font-family: "Helvetica Neue", Helvetica, Arial;
+  font-family: "Roboto", "Helvetica Neue", Helvetica, Arial;
   line-height: 1.2em;
   text-align: center;
   padding: 5px;

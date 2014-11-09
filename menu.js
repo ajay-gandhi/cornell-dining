@@ -54,48 +54,64 @@ module.exports.get_menu = function (time, name) {
       // Wait for new page to load
       browser.wait()
         .then(function () {
-          browser.select('menulocations', hall_id.toString());
-          browser.document.forms[0].submit();
 
-          // Wait for new page to load
-          browser.wait()
-            .then(function() {
-              // Get the div containing the form
-              // This div also contains the menu
-              var menu_container = browser.query('form#menuform').parentNode;
-              var children = menu_container.children;
+          // Check if the dining hall option exists
+          if (browser.query('#menulocations').options)
+          var exists = false;
+          browser.query('#menulocations').options.forEach(function (option) {
+            if (option.value === hall_id.toString()) {
+              exists = true;
+            }
+          });
 
-              // Loop through the container's children
-              for (var i = 0; i < children.length; i++) {
-                var elm = children[i];
-                if (elm.innerHTML) {
-                  // The element contains stuff, so it's an important HTML element
-                  if (elm.tagName == 'H4' && elm.className == 'menuCatHeader') {
-                    // It's a heading/station name, so create a new object for it
-                    menu.push({
-                      station: elm.textContent.trim(),
-                      items:   []
-                    });
+          if (!exists) {
+            // The option isn't there, return that there is no menu
+            resolve([]);
 
-                  } else if (elm.tagName == 'P' && elm.className == 'menuItem') {
-                    // It's an actual menu item itself
-                    // Add it on the the last object in menu
-                    if (menu.length == 0) {
-                      // Menu is empty, i.e. there was no station name
-                      // Create an item without a station name
+          } else {
+            browser.select('menulocations', hall_id.toString());
+            browser.document.forms[0].submit();
+
+            // Wait for new page to load
+            browser.wait()
+              .then(function() {
+                // Get the div containing the form
+                // This div also contains the menu
+                var menu_container = browser.query('form#menuform').parentNode;
+                var children = menu_container.children;
+
+                // Loop through the container's children
+                for (var i = 0; i < children.length; i++) {
+                  var elm = children[i];
+                  if (elm.innerHTML) {
+                    // The element contains stuff, so it's an important HTML element
+                    if (elm.tagName == 'H4' && elm.className == 'menuCatHeader') {
+                      // It's a heading/station name, so create a new object for it
                       menu.push({
-                        items: [elm.textContent.trim()]
+                        station: elm.textContent.trim(),
+                        items:   []
                       });
-                    } else {
-                      // Just add it on
-                      menu[menu.length - 1].items.push(elm.textContent.trim());
+
+                    } else if (elm.tagName == 'P' && elm.className == 'menuItem') {
+                      // It's an actual menu item itself
+                      // Add it on the the last object in menu
+                      if (menu.length == 0) {
+                        // Menu is empty, i.e. there was no station name
+                        // Create an item without a station name
+                        menu.push({
+                          items: [elm.textContent.trim()]
+                        });
+                      } else {
+                        // Just add it on
+                        menu[menu.length - 1].items.push(elm.textContent.trim());
+                      }
                     }
                   }
                 }
-              }
 
-              resolve(menu);
-            });
+                resolve(menu);
+              });
+          }
       });
     });
   });

@@ -34,8 +34,6 @@ module.exports.start_server = function(eatery_object) {
       .catch(console.error);
   });
 
-
-
   app.get('/closest', function (req, res) {
     // Requesting the closest dining hall
 

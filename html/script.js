@@ -448,19 +448,33 @@ var find_menu = function (name) {
       hall: name,
       time: today.getTime()
     }
-  }).done(function (c) {
-    // Remove loading notification
+  }).done(function (menu) {
+    // Set the content
+    menu = JSON.parse(menu);
+    menu.forEach(function (station) {
+      // Add the heading (station name)
+      if (station.station) {
+        $('div#menu-content').append(
+          '<div class="menu-station">' +
+          '<h2>' + station.station + '</h2>'
+        );
+      }
+
+      station.items.forEach(function (item) {
+        $('div#menu-content')
+          .append('<span class="item">' + item + '</span><br />');
+      });
+      $('div#menu-content').append('<br /></div>');
+    });
+
+    // The user may have already removed the notification
     if ($('div#notification-' + finding_menu).length == 0) {
-      // Set the content
-      $('div#menu-content').text(JSON.stringify(c));
       // Slide it down
       $('div#menu-tool-wrapper').animate({
         top: '15px'
       });
     } else {
       remove_notification(finding_menu, function () {
-        // Set the content
-        $('div#menu-content').text(JSON.stringify(c));
         // Ensure that the menu background matches the menu itself
         $('div#menu-background').css({
           margin: '0',

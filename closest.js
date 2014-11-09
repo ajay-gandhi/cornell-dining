@@ -12,8 +12,6 @@ var api_url = 'https://maps.googleapis.com/maps/api/distancematrix/json'
   + '&mode=walking'
   + '&language=en-US';
 
-// json?origins=42.4447437452151,-76.48434111717543&destinations=42.446697,-76.485572
-
 module.exports.closest = function (data, user_loc) {
 
   return new Promise(function (resolve, reject) {

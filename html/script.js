@@ -32,17 +32,11 @@ function initialize() {
 google.maps.event.addDomListener(window, 'load', initialize);
 
 $(document).ready(function () {
-  // Loader notification
-  var finding_opens = notify('Finding open places...', -1);
-
   // Make an AJAX query to the server, providing the local time in ms
   $.ajax({
     url: 'open',
     data: { localTime: today.getTime() }
   }).done(function (data) {
-    // Remove the loader notification
-    remove_notification(finding_opens);
-
     if (data.trim() == '{}') {
       // All dining halls are closed right now
       notify('Everything is closed. Sorry!', -1);
@@ -60,29 +54,43 @@ $(document).ready(function () {
           }, index * 50);
         });
       }, 500);
-
-      // Append the closest eatery button
-      $('div#where, div#where-background')
-        // Hide it first
-        .css({
-          right: '-170px'
-        })
-        // Slide it up
-        .animate({
-          right: '15px'
-        })
-        // Slide it down on click and find the closest place
-        .click(function () {
-          find_closest(data);
-
-          $(this).animate({
-            right: '-170px'
-          });
-          $('div#where-background').animate({
-            right: '-170px'
-          });
-        });
     }
+  });
+
+  var options_panel = $('div#options, div#options-background');
+
+  // Click event to open the options panel
+  $('button#show-options')
+    .stop()
+    // Slide it up
+    .animate({
+      right: '-5px'
+    })
+    // Slide it out on click and display the options panel
+    .click(function () {
+      $(this).animate({
+        right: '-50px'
+      }, {
+        complete: function () {
+          options_panel.animate({
+            right: '-10px'
+          });
+        }
+      });
+    });
+
+  // Click event to close the options panel
+  $('button#hide-options').click(function (e) {
+    e.preventDefault();
+    options_panel.stop().animate({
+      right: '-220px'
+    }, {
+      complete: function () {
+        $('button#show-options').animate({
+          right: '-5px'
+        });
+      }
+    });
   });
 
   // Click event to close menu tool
@@ -104,16 +112,26 @@ $(document).ready(function () {
   });
 
   // They clicked on update
-  $('button#update').click(function () {
+  $('button#update-time').click(function (e) {
+    // Stop the form from submitting
+    e.preventDefault();
+
     // Remove any existing markers
     markers.forEach(function (marker) {
       marker.setMap(null);
     });
     markers = [];
+    infowindows = [];
 
-    // Hide the closest place button
-    $('div#where, div#where-background').animate({
-      right: '-170px'
+    // Hide options panel
+    options_panel.stop().animate({
+      right: '-220px'
+    }, {
+      complete: function () {
+        $('button#show-options').animate({
+          right: '-5px'
+        });
+      }
     });
 
     // Parse the inputs
@@ -138,15 +156,8 @@ $(document).ready(function () {
     today.setMinutes(time.min);
 
     // Remove any existing notifications
-    $('div.notification').each(function () {
-      $(this).animate({
-        top: '-60px'
-      }, {
-        complete: function () {
-          $(this).remove();
-        }
-      });
-    });
+    remove_all_notifications();
+
     // Open a new loading notification
     var finding_opens = notify('Finding open places...', -1);
 
@@ -177,11 +188,6 @@ $(document).ready(function () {
             }, index * 50);
           });
         }, 1000);
-
-        // Slide the closest eatery button in
-        $('div#where, div#where-background').stop().animate({
-          right: '15px'
-        });
       }
     });
   });
@@ -298,6 +304,7 @@ var prettify_name = function (n) {
  *             notification disappears, either by user interaction or timeout
  */
 var notify = function (msg, duration, callback) {
+  console.log('Going to notify with message: ', msg);
   // Create a unique id for the notification
   var id = Math.floor((Math.random() * 10000) + 1).toString();
 
@@ -307,8 +314,9 @@ var notify = function (msg, duration, callback) {
   }
 
   var new_html = '<div class="notification no-select" id="notification-' + id
-    + '"><div class="notification-message">' + msg + '</div>'
-    + '<div class="notification-background"></div></div>';
+    + '"><div class="notification-background"></div>'
+    + '<div class="notification-message">' + msg + '</div>'
+    + '</div>';
   $('body').append(new_html);
 
   // Remove the notification if it is clicked
@@ -354,6 +362,22 @@ var remove_notification = function (id, callback) {
       }
     });
   }
+}
+
+/**
+ * Removes all notifications. This method should primarily be used when
+ *   notifications with unknown IDs need to be removed.
+ */
+var remove_all_notifications = function () {
+  $('div.notification').each(function () {
+    $(this).animate({
+      top: '-60px'
+    }, {
+      complete: function () {
+        $(this).remove();
+      }
+    });
+  });
 }
 
 /**

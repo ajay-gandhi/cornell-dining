@@ -2,7 +2,7 @@
 <html>
 <head>
   <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
-  <link href='http://fonts.googleapis.com/css?family=Roboto' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
   <link rel="stylesheet" type="text/css" href="style.css" />
   <title>Cornell Dining</title>
   <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
@@ -11,30 +11,43 @@
 </head>
 <body>
   <div id="map-canvas" class="no-select"></div>
-  <div id="where">Find me a<br />place to eat!</div>
-  <div id="where-background"></div>
 
-  <div id="menu-tool-wrapper">
-    <div id="menu-background"></div>
-    <div id="menu-tool">
-      <div id="menu-content"></div>
-      <div id="close-menu-wrapper">
-        <button id="close-menu-tool">Close</button>
+  <div class="container-fluid">
+    <div id="menu-tool-wrapper">
+      <div id="menu-background"></div>
+      <div id="menu-tool">
+        <div id="menu-content"></div>
+        <div id="close-menu-wrapper">
+          <button id="close-menu-tool">Close</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div id="time-wrapper">
-    <input type="number" class="time" id="hour" max="12" min="1" />
-    <span id="separator">:</span>
-    <input type="number" class="time" id="min" max="59" min="1" />
-    <select id="ampm">
-        <option value="am">am</option>
-        <option value="pm">pm</option>
-    </select>
-    <br /><button id="update" class="no-select">Update</button>
+    <button class="btn btn-default btn-lg" id="show-options">|</button>
+    <div id="options">
+      <div id="other">
+        <button class="btn btn-primary btn-lg" id="where">Find me a<br />place to eat!</button>
+      </div>
+
+      <form class="form-inline" id="update-time" role="form">
+        <div class="form-group">
+          <label class="sr-only" for="hour">Hour</label>
+          <input type="number" class="form-control input-lg" id="hour" max="12" min="1" />
+          <label id="separator">:</label>
+          <label class="sr-only" for="min">Minute</label>
+          <input type="number" class="form-control input-lg" id="min" max="59" min="1" />
+        </div>
+        <select class="form-control" id="ampm">
+          <option value="am">am</option>
+          <option value="pm">pm</option> 
+        </select>
+        <br />
+        <button class="btn btn-primary btn-lg" id="update-time">Update</button>
+        <button class="btn btn-danger btn-lg" id="hide-options">Close</button>
+      </form>
+    </div>
+    <div id="options-background"></div>
   </div>
-  <div id="time-background"></div>
 </div>
 </body>
 </html>

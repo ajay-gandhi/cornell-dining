@@ -1,51 +1,5 @@
 /**
- * CSS Reset
- */
-html, body, div, span, applet, object, iframe,
-h1, h2, h3, h4, h5, h6, p, blockquote, pre,
-a, abbr, acronym, address, big, cite, code,
-del, dfn, em, img, ins, kbd, q, s, samp,
-small, strike, strong, sub, sup, tt, var,
-b, u, i, center,
-dl, dt, dd, ol, ul, li,
-fieldset, form, label, legend,
-table, caption, tbody, tfoot, thead, tr, th, td,
-article, aside, canvas, details, embed, 
-figure, figcaption, footer, header, hgroup, 
-menu, nav, output, ruby, section, summary,
-time, mark, audio, video {
-  margin: 0;
-  padding: 0;
-  border: 0;
-  font-size: 100%;
-  font: inherit;
-  vertical-align: baseline;
-}
-article, aside, details, figcaption, figure, 
-footer, header, hgroup, menu, nav, section {
-  display: block;
-}
-body {
-  line-height: 1;
-}
-ol, ul {
-  list-style: none;
-}
-blockquote, q {
-  quotes: none;
-}
-blockquote:before, blockquote:after,
-q:before, q:after {
-  content: '';
-  content: none;
-}
-table {
-  border-collapse: collapse;
-  border-spacing: 0;
-}
-
-/**
- * Redirect Page
+ * General styles
  */
 .no-select {
   -webkit-user-select: none;
@@ -65,44 +19,14 @@ html {
 }
 
 /**
- * Loading elements
- */
-div#loading-wrapper {
-  background-color: #e4e0d4;
-  width: 100%;
-  height: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 99;
-}
-div#loading {
-  text-align: center;
-  width: 400px;
-  height: 100px;
-  margin: auto;
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-}
-div#loading h2 {
-  color: #ffffff;
-  font-size: 40px;
-  font-family: "Roboto", "Helvetica Neue", Helvetica, Arial;
-  margin-bottom: 20px;
-}
-div#loading span {
-  color: #ffffff;
-  font-size: 20px;
-  font-family: "Roboto", "Helvetica Neue", Helvetica, Arial;
-}
-
-/**
  * Map elements
  */
 div#map-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  width: 100%;
   height: 100%;
 }
 div.infowindow {
@@ -111,7 +35,7 @@ div.infowindow {
   max-width: 350px;
   padding: 2px;
   white-space: nowrap;
-}
+}/*
 div.infowindow h2 {
   font-size: 22px;
   font-weight: bold;
@@ -125,7 +49,7 @@ div.infowindow div.menu {
   color: #0000FF;
   cursor: pointer;
   width: 150px;
-}
+}*/
 
 /**
  * Menu tool
@@ -145,9 +69,9 @@ div#menu-background {
   top: 0px;
   left: 15px;
   z-index: 4;
-  opacity: 0.8;
-  background-color: #ffffff;
-  border: 2px solid red;
+  opacity: 0.7;
+  background-color: #FFFFFF;
+  border: 2px solid #333333;
   border-radius: 10px;
   width: 100%;
   height: 100%;
@@ -157,7 +81,7 @@ div#menu-background {
 div#menu-tool {
   position: relative;
   z-index: 5;
-  border: 2px solid red;
+  border: 2px solid #333333;
   border-radius: 10px;
   padding: 10px;
   width: 100%;
@@ -184,7 +108,7 @@ button#close-menu-tool {
     padding: 5px;
     border: 1px solid black;
     border-radius: 5px;
-    background-color: #ffffff;
+    background-color: #FFFFFF;
     color: #000000;
     font-family: "Roboto", "Helvetica Neue", Helvetica, sans;
     text-align: center;
@@ -195,111 +119,84 @@ button#close-menu-tool {
  * Notifications
  */
 div.notification-background {
-  opacity: 0.8;
-  width: 100%;
-  height: 100%;
+  opacity: 0.7;
   position: absolute;
   top: 0;
   left: 0;
   z-index: 1;
-  background-color: #ffffff;
+  width: 100%;
+  height: 40px;
+  background-color: #FFFFFF;
+  border-bottom: 2px solid #333333;
 }
 div.notification {
   position: fixed;
-  width: 100%;
-  height: 20px;
-  padding: 10px 0px;
   top: -60px;
   left: 0;
   z-index: 1000;
+  width: 100%;
+  height: 40px;
   cursor: pointer;
+  line-height: 40px;
   font-size: 18px;
-  font-family: "Roboto", "Helvetica Neue", Helvetica, Arial;
+  font-family: "Helvetica Neue", Helvetica, Arial;
   text-align: center;
-  border-bottom: 2px solid red;
+  border-bottom: 2px solid #333333;
 }
 div.notification-message {
   position: relative;
   z-index: 5;
 }
-div#where-background {
-  opacity: 0.8;
-  padding: 5px;
-  height: 60px;
-  width: 150px;
-  position: fixed;
-  bottom: 100px;
-  right: -160px;
-  z-index: 998;
-  background-color: #ffffff;
-  border: 2px solid red;
-  border-radius: 10px;
-}
-div#where {
-  cursor: pointer;
-  font-size: 24px;
-  font-family: "Roboto", "Helvetica Neue", Helvetica, Arial;
-  line-height: 1.2em;
-  text-align: center;
-  padding: 5px;
-  height: 60px;
-  width: 150px;
-  position: fixed;
-  bottom: 100px;
-  right: -160px;
-  z-index: 999;
-  border: 2px solid red;
-  border-radius: 10px;
-}
 
 /**
- * Time input
+ * Options Panel
  */
-div#time-background {
-  opacity: 0.8;
-  background-color: #ffffff;
+div#options-background {
+  border: 2px solid #333333;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
+  background-color: #FFFFFF;
   position: fixed;
   bottom: 15px;
-  right: 15px;
+  right: -220px;
   z-index: 1004;
-  width: 185px;
-  height: 70px;
-  border: 2px solid red;
-  border-radius: 10px;
+  width: 210px;
+  height: 210px;
+  opacity: 0.7;
 }
-div#time-wrapper {
-  border: 2px solid red;
-  border-radius: 10px;
+div#options {
+  border: 2px solid #333333;
+  border-top-left-radius: 10px;
+  border-bottom-left-radius: 10px;
   position: fixed;
   bottom: 15px;
-  right: 15px;
+  right: -220px;
   z-index: 1005;
-  padding: 5px;
-  width: 175px;
-  height: 60px;
-  text-align: center;
+  width: 210px;
+  height: 210px;
+  padding: 10px 0px 0px 10px;
 }
-input.time {
-  outline: none;
-  font-size: 16px;
-  height: 20px;
+button#show-options {
+  text-align: left;
+  position: fixed;
+  bottom: 15px;
+  right: -50px;
+  z-index: 500;
   width: 40px;
-  margin-bottom: 5px;
+  border-top-right-radius: 0px;
+  border-bottom-right-radius: 0px;
+}
+button#where {
+  width: 175px;
+  font-size: 22px;
+}
+form#update-time {
+  margin-top: 15px;
+}
+form.form-inline div.form-group input {
   text-align: right;
-}
-span#separator {
-  font-size: 16px;
-  font-weight: bold;
-}
-select#ampm {
-  font-size: 16px;
-}
-button#update {
-  font-size: 16px;
-  height: 30px;
-  width: 71px;
-  background-color: #ffffff;
-  border: 1px solid black;
-  border-radius: 5px;
-  cursor: pointer;
+  padding: 0px 5px 0px 5px;
+  width: 50px;
+  height: 40px;
+  margin-bottom: 5px;
 }

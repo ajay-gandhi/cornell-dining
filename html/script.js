@@ -65,21 +65,21 @@ $(document).ready(function () {
       $('div#where, div#where-background')
         // Hide it first
         .css({
-          bottom: '-100px'
+          right: '-170px'
         })
         // Slide it up
         .animate({
-          bottom: '15px'
+          right: '15px'
         })
         // Slide it down on click and find the closest place
         .click(function () {
           find_closest(data);
 
           $(this).animate({
-            bottom: '-100px'
+            right: '-170px'
           });
           $('div#where-background').animate({
-            bottom: '-100px'
+            right: '-170px'
           });
         });
     }
@@ -96,6 +96,7 @@ $(document).ready(function () {
   // Set the input to local time
   update_input();
 
+  // Ensure preceding 0 on minute input
   $('input#min').change(function () {
     while ($('input#min').val().length < 2) {
       $('input#min').val( '0' + $('input#min').val() );
@@ -112,7 +113,7 @@ $(document).ready(function () {
 
     // Hide the closest place button
     $('div#where, div#where-background').animate({
-      bottom: '-100px'
+      right: '-170px'
     });
 
     // Parse the inputs
@@ -177,21 +178,10 @@ $(document).ready(function () {
           });
         }, 1000);
 
-        // Append the closest eatery button
-        $('div#where, div#where-background')
-          .stop()
-          // Slide it up
-          .animate({
-            bottom: '15px'
-          })
-          // Slide it down on click and find the closest place
-          .click(function () {
-            find_closest(data);
-
-            $(this).animate({
-              bottom: '-100px'
-            });
-          });
+        // Slide the closest eatery button in
+        $('div#where, div#where-background').stop().animate({
+          right: '15px'
+        });
       }
     });
   });
@@ -410,12 +400,15 @@ var find_closest = function (data) {
       c = JSON.parse(c);
       var notif_msg = prettify_name(c.name) + ' is only '
         + c.distance + ' away.';
+      // Create the notification
       notify(notif_msg, -1, function () {
+        // If the notification ever goes away, stop bouncing the marker
         markers.forEach(function (marker) {
           marker.setAnimation(null);
         });
+        // and slide in the closest eatery button
         $('div#where, div#where-background').animate({
-          bottom: '15px'
+          right: '15px'
         });
       });
 

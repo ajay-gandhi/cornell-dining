@@ -228,8 +228,8 @@ div#where-background {
   height: 60px;
   width: 150px;
   position: fixed;
-  bottom: 15px;
-  left: 15px;
+  bottom: 100px;
+  right: -160px;
   z-index: 998;
   background-color: #ffffff;
   border: 2px solid red;
@@ -245,8 +245,8 @@ div#where {
   height: 60px;
   width: 150px;
   position: fixed;
-  bottom: 15px;
-  left: 15px;
+  bottom: 100px;
+  right: -160px;
   z-index: 999;
   border: 2px solid red;
   border-radius: 10px;

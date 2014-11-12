@@ -262,7 +262,7 @@ div#time-background {
   bottom: 15px;
   right: 15px;
   z-index: 1004;
-  width: 180px;
+  width: 185px;
   height: 70px;
   border: 2px solid red;
   border-radius: 10px;
@@ -275,7 +275,7 @@ div#time-wrapper {
   right: 15px;
   z-index: 1005;
   padding: 5px;
-  width: 170px;
+  width: 175px;
   height: 60px;
   text-align: center;
 }

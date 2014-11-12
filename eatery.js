@@ -23,13 +23,7 @@ module.exports = (function () {
       eatery_names:  null,
       num_eateries:  null,
       eatery_events: {},
-    }
-
-    // This data doesn't change - it is hardcoded in eatery_information.json
-    this.constants = {
-      latlongs:  null,
-      buildings: null,
-      payments:  null
+      latlongs:      {}
     }
   }
 
@@ -37,13 +31,7 @@ module.exports = (function () {
     var self = this;
 
     return new Promise(function (resolve, reject) {
-      // Get and cache the hardcoded data
-      var e_info = require('./eatery_information.json');
-      self.constants.latlongs  = e_info.latlongs;
-      self.constants.buildings = e_info.buildings;
-      self.constants.payments  = e_info.payments;
-
-      // Get all the event data, including names, and open/close times
+      // Get all the event data, including names, latlong, and open/close times
       // Running this single method will call all the other getters and set the
       // cached values for later
       self.get_all_events()
@@ -127,6 +115,8 @@ module.exports = (function () {
             reject(error);
           } else {
             // Cache and return
+            var coords = JSON.parse(body).coordinates.split(',');
+            self.cache.latlongs[name]      = coords;
             self.cache.eatery_events[name] = JSON.parse(body).events;
             resolve(self.cache.eatery_events[name]);
           }
@@ -224,24 +214,18 @@ module.exports = (function () {
                 && currently.getTime()  <= last_time.getTime()) {
 
                 if (elm.rexcept) {
-                  // The event contains a parameter defining exceptions to the
+                  // The event contains a parameter defining an exception to the
                   // repeat rule. We need to ensure that the given date does not
-                  // fall into any of these excluded dates
-                  var is_okay = true;
+                  // fall into this excluded date
+                  var no_go_date = parse_time(elm.rexcept);
 
-                  elm.rexcept.forEach(function (no_go) {
-                    var no_go_date = parse_time(no_go);
-                    if (
-                      no_go_date.getFullYear() == currently.getFullYear()
-                      && no_go_date.getMonth() == currently.getMonth()
-                      && no_go_date.getDate()  == currently.getDate()
-                    ) {                
-                      // The exceptions don't match
-                      is_okay = false;
-                    }
-                  });
-
-                  if (is_okay) {
+                  if (
+                    no_go_date.getFullYear() == currently.getFullYear()
+                    && no_go_date.getMonth() == currently.getMonth()
+                    && no_go_date.getDate()  == currently.getDate()
+                  ) {                
+                    // The exceptions match, so it is not open
+                  } else {
                     // Given range is valid, now check hours
                     var this_time = (currently.getHours() * 100)
                       + currently.getMinutes();
@@ -363,7 +347,7 @@ module.exports = (function () {
 
   /**
    * Returns only relevant data about an eatery. This entails:
-   *   { opening time, closing time, summary, lat/long, building, payment type }
+   *   { opening time, closing time, summary, lat/long }
    * Requires: [String] n   - The name of the eatery
    *           [Object] evt - A Google calendar event
    * Returns: [Object] The data of an eatery as listed above.
@@ -381,9 +365,7 @@ module.exports = (function () {
     }
 
     // The local vars are set, use those
-    return_obj.latlong  = self.constants.latlongs[n];
-    return_obj.building = self.constants.buildings[n];
-    return_obj.payment  = self.constants.payments[n];
+    return_obj.latlong  = self.cache.latlongs[n];
 
     return return_obj;
   }

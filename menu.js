@@ -56,13 +56,14 @@ module.exports.get_menu = function (time, name) {
         .then(function () {
 
           // Check if the dining hall option exists
-          if (browser.query('#menulocations').options)
           var exists = false;
-          browser.query('#menulocations').options.forEach(function (option) {
+          var options = browser.query('#menulocations').options;
+          for (var c = 0; c < options.length; c++) {
+            option = options[c];
             if (option.value === hall_id.toString()) {
               exists = true;
             }
-          });
+          }
 
           if (!exists) {
             // The option isn't there, return that there is no menu

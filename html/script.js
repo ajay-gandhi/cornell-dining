@@ -94,10 +94,10 @@ $(document).ready(function () {
   });
 
   // Click event to close menu tool
-  $('a#close-menu-tool').click(function (e) {
+  $('button#close-menu-tool').click(function (e) {
     e.preventDefault();
-    $('div#menu-tool-wrapper').animate({
-      top: '-' + $('div#menu-tool-wrapper').outerHeight()
+    $('div#menu-tool, div#menu-background').animate({
+      top: '-' + ($('div#menu-tool').outerHeight() + 50)
     });
   });
 
@@ -472,7 +472,7 @@ var find_menu = function (name) {
       // Add the heading (station name)
       if (station.station) {
         $('div#menu-content').append(
-          '<div class="menu-station">' +
+          '<p><div class="menu-station">' +
           '<h2>' + station.station + '</h2>'
         );
       }
@@ -481,26 +481,25 @@ var find_menu = function (name) {
         $('div#menu-content')
           .append('<span class="item">' + item + '</span><br />');
       });
-      $('div#menu-content').append('<br /></div>');
+      $('div#menu-content').append('<br /></div></p>');
     });
 
+    // Set the width and height of the background to that of the content
+    $('div#menu-background').css({
+      height: $('div#menu-tool').outerHeight()
+    });
+
+    var menu_tool = $('div#menu-tool, div#menu-background');
     // The user may have already removed the notification
     if ($('div#notification-' + finding_menu).length == 0) {
       // Slide it down
-      $('div#menu-tool-wrapper').animate({
+      menu_tool.animate({
         top: '15px'
       });
     } else {
       remove_notification(finding_menu, function () {
-        // Ensure that the menu background matches the menu itself
-        $('div#menu-background').css({
-          margin: '0',
-          padding: '10px',
-          width:  $('div#menu-tool').width(),
-          height: $('div#menu-tool').height()
-        });
         // Slide it down
-        $('div#menu-tool-wrapper').animate({
+        menu_tool.animate({
           top: '15px'
         });
       });

@@ -203,6 +203,10 @@ module.exports = (function () {
             var last_time = end_time;
             if (elm.rrule.end) {
               last_time = parse_time(elm.rrule.end);
+            } else {
+              // Assume the event never ends
+              last_time = new Date();
+              last_time = last_time.setFullYear(last_time.getFullYear() + 2);
             }
 
             if (elm.rrule.weekdays) {

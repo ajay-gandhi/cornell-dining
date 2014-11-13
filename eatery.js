@@ -206,8 +206,9 @@ module.exports = (function () {
             }
 
             if (elm.rrule.weekdays) {
-              // The event contains info about which days the even repeats
-              // Only continue if given day is one of those and it is in range
+              // The event contains info about which days of the week the event
+              // repeats. Only continue if given day is one of those and it is
+              // the range defined by the repeating event
               dow = day_of_week(currently);
               if (elm.rrule.weekdays.split(',').indexOf(dow) >= 0
                 && start_time.getTime() <= currently.getTime()
@@ -237,7 +238,7 @@ module.exports = (function () {
                       + end_time.getMinutes();
 
                     if (end_time.getHours() <= start_time.getHours()) {
-                      // This means the event overlaps to the following day
+                      // This means the event overflows to the following day
                       // If this is the case, add 24 hours to interval end
                       max_time += 2400;
                     }
@@ -259,7 +260,7 @@ module.exports = (function () {
                     + end_time.getMinutes();
 
                   if (end_time.getHours() <= start_time.getHours()) {
-                    // This means the event overlaps to the following day
+                    // This means the event overflows to the following day
                     // If this is the case, add 24 hours to interval end
                     max_time += 2400;
                   }
@@ -267,6 +268,49 @@ module.exports = (function () {
                   // Now check if the time is in the interval
                   if (min_time <= this_time && this_time <= max_time) {
                     answer = self.relevant_data(name, elm);
+                  }
+                }
+              } else {
+                // If the event overflows into the following day (i.e. Nasties)
+                // then the place may be open even if the day is incorrect.
+                // In other words, if the event overflows, add the following day
+                // to the array of acceptable days
+                if (end_time.getHours() <= start_time.getHours()) {
+                  // The event does overflow
+
+                  // Get the last possible day from the repeating days
+                  var acceptable_days = elm.rrule.weekdays.split(',');
+                  var days = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'];
+                  var last = 'MO';
+                  acceptable_days.forEach(function (day) {
+                    if (days.indexOf(day) > days.indexOf(last)) {
+                      last = day;
+                    }
+                  });
+                  // Add on the next day of the week
+                  acceptable_days.push(days[(days.indexOf(last) + 1) % 7]);
+
+                  if (acceptable_days.indexOf(dow) >= 0
+                    && start_time.getTime() <= currently.getTime()
+                    && currently.getTime()  <= last_time.getTime()) {
+
+                    // Given range is valid, now check hours
+                    var this_time = (currently.getHours() * 100)
+                      + currently.getMinutes();
+
+                    var min_time = (start_time.getHours() * 100)
+                      + end_time.getMinutes();
+
+                    var max_time = (end_time.getHours() * 100)
+                      + end_time.getMinutes();
+
+                    // The event overflows so add 2400 to the end time
+                    max_time += 2400;
+
+                    // Now check if the time is in the interval
+                    if (min_time <= this_time && this_time <= max_time) {
+                      answer = self.relevant_data(name, elm);
+                    }
                   }
                 }
               }

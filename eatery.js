@@ -254,6 +254,11 @@ module.exports = (function () {
 
                     // Now check if the time is in the interval
                     if (min_time <= this_time && this_time <= max_time) {
+                      console.log(name);
+                      console.log(this_time);
+                      console.log(min_time);
+                      console.log(max_time);
+                      console.log('\n\n');
                       answer = self.relevant_data(name, elm);
                     }
                   }
@@ -279,6 +284,11 @@ module.exports = (function () {
 
                   // Now check if the time is in the interval
                   if (min_time <= this_time && this_time <= max_time) {
+                    console.log(name);
+                    console.log(this_time);
+                    console.log(min_time);
+                    console.log(max_time);
+                    console.log('\n\n');
                     answer = self.relevant_data(name, elm);
                   }
                 }
@@ -322,6 +332,10 @@ module.exports = (function () {
 
                     // Now check if the time is in the interval
                     if (min_time <= this_time && this_time <= max_time) {
+                      console.log(this_time);
+                      console.log(min_time);
+                      console.log(max_time);
+                      console.log('\n\n');
                       answer = self.relevant_data(name, elm);
                     }
                   }
@@ -338,6 +352,11 @@ module.exports = (function () {
             // Check if the place is open between those times
             if (start_time.getTime() <= currently.getTime()
               && currently.getTime() <= end_time.getTime()) {
+            console.log(name);
+            console.log(this_time);
+            console.log(min_time);
+            console.log(max_time);
+            console.log('\n\n');
             answer = self.relevant_data(name, elm);
             }
           }

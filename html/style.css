@@ -163,6 +163,8 @@ button#show-options {
   right: -50px;
   z-index: 500;
   width: 40px;
+  font-weight: bold;
+  border: 2px solid #333333;
   border-top-right-radius: 0px;
   border-bottom-right-radius: 0px;
 }

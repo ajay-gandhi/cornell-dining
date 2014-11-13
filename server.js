@@ -29,6 +29,10 @@ module.exports.start_server = function(eatery_object) {
     // Pass it to the eatery module to get which places are open
     eatery_object.are_open(local_time, true)
       .then(function (results) {
+        console.log('\n\n\n');
+        console.log(results);
+        console.log(new Date());
+        console.log('\n\n\n');
         res.send(JSON.stringify(results));
       })
       .catch(console.error);

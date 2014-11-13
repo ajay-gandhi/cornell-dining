@@ -35,10 +35,7 @@ $(document).ready(function () {
   // Make an AJAX query to the server, providing the local time in ms
   $.ajax({
     url: 'open',
-    data: {
-      localTime: today.getTime(),
-      tzOffset:  today.getTimezoneOffset()
-    }
+    data: { localTime: today.getTime() }
   }).done(function (data) {
     if (data.trim() == '{}') {
       // All dining halls are closed right now

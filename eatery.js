@@ -202,12 +202,15 @@ module.exports = (function () {
             // then that is the actual end time for the event
             var last_time = end_time;
             if (elm.rrule.end) {
-              last_time = parse_time(elm.rrule.end);
+              var repeat_end = parse_time(elm.rrule.end);
+              last_time.setUTCDate(repeat_end.getUTCDate());
+              last_time.setUTCMonth(repeat_end.getUTCMonth());
+              last_time.setFullYear(repeat_end.getUTCFullYear());
+
             } else {
-              console.log('No rrule end. ', name);
               // Assume the event never ends
               // In other words, set last_time to a Date 2 years in the future
-              var new_full_year = (new Date()).getFullYear() + 2;
+              var new_full_year = (new Date()).getUTCFullYear() + 2;
               last_time.setFullYear(new_full_year);
             }
 
@@ -227,21 +230,21 @@ module.exports = (function () {
                   var no_go_date = parse_time(elm.rexcept);
 
                   if (
-                    no_go_date.getFullYear() == currently.getFullYear()
-                    && no_go_date.getMonth() == currently.getMonth()
-                    && no_go_date.getDate()  == currently.getDate()
+                    no_go_date.getUTCFullYear() == currently.getUTCFullYear()
+                    && no_go_date.getUTCMonth() == currently.getUTCMonth()
+                    && no_go_date.getUTCDate()  == currently.getUTCDate()
                   ) {                
                     // The exceptions match, so it is not open
                   } else {
                     // Given range is valid, now check hours
-                    var this_time = (currently.getHours() * 100)
-                      + currently.getMinutes();
+                    var this_time = (currently.getUTCHours() * 100)
+                      + currently.getUTCMinutes();
 
-                    var min_time = (start_time.getHours() * 100)
-                      + end_time.getMinutes();
+                    var min_time = (start_time.getUTCHours() * 100)
+                      + end_time.getUTCMinutes();
 
-                    var max_time = (end_time.getHours() * 100)
-                      + end_time.getMinutes();
+                    var max_time = (end_time.getUTCHours() * 100)
+                      + end_time.getUTCMinutes();
 
                     if (max_time < min_time) {
                       // This means the event overflows to the following day
@@ -254,26 +257,19 @@ module.exports = (function () {
 
                     // Now check if the time is in the interval
                     if (min_time <= this_time && this_time <= max_time) {
-                      console.log(name);
-                      console.log(this_time);
-                      console.log(min_time);
-                      console.log(start_time);
-                      console.log(max_time);
-                      console.log(end_time);
-                      console.log('\n\n');
                       answer = self.relevant_data(name, elm);
                     }
                   }
                 } else {
                   // Given range is valid, now check hours
-                  var this_time = (currently.getHours() * 100)
-                    + currently.getMinutes();
+                  var this_time = (currently.getUTCHours() * 100)
+                    + currently.getUTCMinutes();
 
-                  var min_time = (start_time.getHours() * 100)
-                    + end_time.getMinutes();
+                  var min_time = (start_time.getUTCHours() * 100)
+                    + end_time.getUTCMinutes();
 
-                  var max_time = (end_time.getHours() * 100)
-                    + end_time.getMinutes();
+                  var max_time = (end_time.getUTCHours() * 100)
+                    + end_time.getUTCMinutes();
 
                   if (max_time < min_time) {
                     // This means the event overflows to the following day
@@ -286,13 +282,6 @@ module.exports = (function () {
 
                   // Now check if the time is in the interval
                   if (min_time <= this_time && this_time <= max_time) {
-                    console.log(name);
-                    console.log(this_time);
-                    console.log(min_time);
-                      console.log(start_time);
-                      console.log(max_time);
-                      console.log(end_time);
-                    console.log('\n\n');
                     answer = self.relevant_data(name, elm);
                   }
                 }
@@ -321,14 +310,14 @@ module.exports = (function () {
                     && currently.getTime()  <= last_time.getTime()) {
 
                     // Given range is valid, now check hours
-                    var this_time = (currently.getHours() * 100)
-                      + currently.getMinutes();
+                    var this_time = (currently.getUTCHours() * 100)
+                      + currently.getUTCMinutes();
 
-                    var min_time = (start_time.getHours() * 100)
-                      + end_time.getMinutes();
+                    var min_time = (start_time.getUTCHours() * 100)
+                      + end_time.getUTCMinutes();
 
-                    var max_time = (end_time.getHours() * 100)
-                      + end_time.getMinutes();
+                    var max_time = (end_time.getUTCHours() * 100)
+                      + end_time.getUTCMinutes();
 
                     // The event overflows so add 2400 to the end time
                     this_time += 2400;
@@ -336,12 +325,6 @@ module.exports = (function () {
 
                     // Now check if the time is in the interval
                     if (min_time <= this_time && this_time <= max_time) {
-                      console.log(this_time);
-                      console.log(min_time);
-                      console.log(start_time);
-                      console.log(max_time);
-                      console.log(end_time);
-                      console.log('\n\n');
                       answer = self.relevant_data(name, elm);
                     }
                   }
@@ -358,13 +341,6 @@ module.exports = (function () {
             // Check if the place is open between those times
             if (start_time.getTime() <= currently.getTime()
               && currently.getTime() <= end_time.getTime()) {
-            console.log(name);
-            console.log(this_time);
-            console.log(min_time);
-                      console.log(start_time);
-                      console.log(max_time);
-                      console.log(end_time);
-            console.log('\n\n');
             answer = self.relevant_data(name, elm);
             }
           }
@@ -443,8 +419,8 @@ module.exports = (function () {
     var s = parse_time(evt.start);
     var e = parse_time(evt.end);
     var return_obj = {
-      start: (s.getHours() * 100) + s.getMinutes(),
-      end: (e.getHours() * 100) + e.getMinutes(),
+      start: (s.getUTCHours() * 100) + s.getUTCMinutes(),
+      end: (e.getUTCHours() * 100) + e.getUTCMinutes(),
       summary: evt.summary
     }
 
@@ -466,10 +442,8 @@ module.exports = (function () {
  * Requires: [String] time    - A string representing a time
  * Returns: [Date] A Date object representing the given time
  */
-var parse_time = function(time, is_red) {
-  var redAPI_tz_offset = 240 * 60000;
-  var no_off = new Date(time);
-  return new Date(no_off.getTime() - redAPI_tz_offset);
+var parse_time = function(time) {
+  return new Date(time);
 }
 
 /**

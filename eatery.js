@@ -254,6 +254,10 @@ module.exports = (function () {
 
                     // Now check if the time is in the interval
                     if (min_time <= this_time && this_time <= max_time) {
+                      console.log(this_time);
+                      console.log(min_time);
+                      console.log(max_time);
+                      console.log('\n\n');
                       answer = self.relevant_data(name, elm);
                     }
                   }
@@ -279,6 +283,10 @@ module.exports = (function () {
 
                   // Now check if the time is in the interval
                   if (min_time <= this_time && this_time <= max_time) {
+                    console.log(this_time);
+                    console.log(min_time);
+                    console.log(max_time);
+                    console.log('\n\n');
                     answer = self.relevant_data(name, elm);
                   }
                 }
@@ -319,12 +327,13 @@ module.exports = (function () {
                     // The event overflows so add 2400 to the end time
                     this_time += 2400;
                     max_time += 2400;
-                    if (this_time < min_time) {
-                      this_time += 2400;
-                    }
 
                     // Now check if the time is in the interval
                     if (min_time <= this_time && this_time <= max_time) {
+                      console.log(this_time);
+                      console.log(min_time);
+                      console.log(max_time);
+                      console.log('\n\n');
                       answer = self.relevant_data(name, elm);
                     }
                   }
@@ -341,7 +350,11 @@ module.exports = (function () {
             // Check if the place is open between those times
             if (start_time.getTime() <= currently.getTime()
               && currently.getTime() <= end_time.getTime()) {
-              answer = self.relevant_data(name, elm);
+              console.log(this_time);
+            console.log(min_time);
+            console.log(max_time);
+            console.log('\n\n');
+            answer = self.relevant_data(name, elm);
             }
           }
         }

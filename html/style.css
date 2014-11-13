@@ -176,6 +176,7 @@ form#update-time {
   margin-top: 15px;
 }
 form.form-inline div.form-group input {
+  display: inline;
   text-align: right;
   padding: 0px 5px 0px 5px;
   width: 50px;

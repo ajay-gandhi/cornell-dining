@@ -204,7 +204,7 @@ module.exports = (function () {
             if (elm.rrule.end) {
               last_time = parse_time(elm.rrule.end);
             } else {
-              console.log('No rrule end.');
+              console.log('No rrule end. ', name);
               // Assume the event never ends
               // In other words, set last_time to a Date 2 years in the future
               var new_full_year = (new Date()).getFullYear() + 2;

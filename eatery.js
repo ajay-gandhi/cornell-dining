@@ -375,14 +375,6 @@ module.exports = (function () {
 })();
 
 
-
-
-
-
-
-
-
-
 /******************************* Local Functions ******************************/
 
 /**
@@ -394,19 +386,6 @@ module.exports = (function () {
  * Returns: [Date] A Date object representing the given time
  */
 var parse_time = function(time, ref) {
-  // // Google Calendar returns time in one of two formats
-  // // One is acceptable by the Date() constructor
-  // if (time.indexOf(':') == -1) {
-  //   // time does not have :
-  //   ref  = ref.substr(-5, 5);
-  //   time = time.substr(0, 4)
-  //     + '-' + time.substr(4, 2)
-  //     + '-' + time.substr(6, 5)
-  //     + ':' + time.substr(11, 2)
-  //     + ':' + time.substr(13, 2)
-  //     + ref;
-  // }
-  // return new Date(time);
   return new Date(time);
 }
 

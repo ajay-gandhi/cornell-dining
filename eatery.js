@@ -205,8 +205,10 @@ module.exports = (function () {
               last_time = parse_time(elm.rrule.end);
             } else {
               // Assume the event never ends
+              // In other words, set last_time to a Date 2 years in the future
               last_time = new Date();
-              last_time = last_time.setFullYear(last_time.getFullYear() + 2);
+              var new_full_year = (new Date()).getFullYear() + 2;
+              last_time.setFullYear(new_full_year);
             }
 
             if (elm.rrule.weekdays) {
@@ -245,6 +247,9 @@ module.exports = (function () {
                       // This means the event overflows to the following day
                       // If this is the case, add 24 hours to interval end
                       max_time += 2400;
+                      if (this_time < min_time) {
+                        this_time += 2400;
+                      }
                     }
 
                     // Now check if the time is in the interval
@@ -267,6 +272,9 @@ module.exports = (function () {
                     // This means the event overflows to the following day
                     // If this is the case, add 24 hours to interval end
                     max_time += 2400;
+                    if (this_time < min_time) {
+                      this_time += 2400;
+                    }
                   }
 
                   // Now check if the time is in the interval
@@ -309,7 +317,11 @@ module.exports = (function () {
                       + end_time.getMinutes();
 
                     // The event overflows so add 2400 to the end time
+                    this_time += 2400;
                     max_time += 2400;
+                    if (this_time < min_time) {
+                      this_time += 2400;
+                    }
 
                     // Now check if the time is in the interval
                     if (min_time <= this_time && this_time <= max_time) {

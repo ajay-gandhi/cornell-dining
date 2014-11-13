@@ -33,6 +33,7 @@ google.maps.event.addDomListener(window, 'load', initialize);
 
 $(document).ready(function () {
   // Make an AJAX query to the server, providing the local time in ms
+  console.log(today);
   $.ajax({
     url: 'open',
     data: {

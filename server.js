@@ -28,8 +28,16 @@ module.exports.start_server = function(eatery_object) {
     var tzOffset = parseInt(req.query.tzOffset) * 60000;
     var local_time = new Date(parseInt(local_ms) - tzOffset);
 
+    // Get timezone offset and convert it to ms
+    var tzOffset = (parseInt(req.query.tzOffset) * 60000);
+    console.log('\n\n\n\n');
+    console.log('timezone offset is ', tzOffset);
+    console.log('new date is ', new Date(local_time.getTime() - tzOffset));
+    console.log('as opposed to ', local_time);
+    console.log('\n\n\n\n');
+
     // Pass it to the eatery module to get which places are open
-    eatery_object.are_open(local_time, true)
+    eatery_object.are_open(local_time, true, tzOffset)
       .then(function (results) {
         res.send(JSON.stringify(results));
       })

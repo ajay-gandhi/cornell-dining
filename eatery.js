@@ -202,7 +202,7 @@ module.exports = (function () {
             // then that is the actual end time for the event
             var last_time = end_time;
             if (elm.rrule.end) {
-              last_time = parse_time(elm.rrule.end, elm.start);
+              last_time = parse_time(elm.rrule.end);
             }
 
             if (elm.rrule.weekdays) {
@@ -380,12 +380,9 @@ module.exports = (function () {
 /**
  * Parses a time string from Google Calendar into a Date object.
  * Requires: [String] time - A string representing a time
- *           [String] ref  - If the given time does not follow a common time
- *   representation standard, a reference time must be passed to allow proper
- *   parsing of the given time
  * Returns: [Date] A Date object representing the given time
  */
-var parse_time = function(time, ref) {
+var parse_time = function(time) {
   return new Date(time);
 }
 

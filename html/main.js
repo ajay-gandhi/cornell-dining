@@ -274,7 +274,15 @@ var add_infowindow = function (e, m, n) {
 
     // Click event for menu
     $('div.infowindow div.menu').click(function () {
-      find_menu(n);
+      remove_all_notifications();
+      $('div#menu-tool, div#menu-background')
+        .animate({
+          top: '-' + ($('div#menu-tool').outerHeight() + 50)
+        }, {
+          complete: function () {
+            find_menu(n);
+          }
+        });
     });
   });
 }

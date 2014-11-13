@@ -204,9 +204,9 @@ module.exports = (function () {
             if (elm.rrule.end) {
               last_time = parse_time(elm.rrule.end);
             } else {
+              console.log('No rrule end.');
               // Assume the event never ends
               // In other words, set last_time to a Date 2 years in the future
-              last_time = new Date();
               var new_full_year = (new Date()).getFullYear() + 2;
               last_time.setFullYear(new_full_year);
             }
@@ -257,7 +257,9 @@ module.exports = (function () {
                       console.log(name);
                       console.log(this_time);
                       console.log(min_time);
+                      console.log(start_time);
                       console.log(max_time);
+                      console.log(end_time);
                       console.log('\n\n');
                       answer = self.relevant_data(name, elm);
                     }
@@ -287,7 +289,9 @@ module.exports = (function () {
                     console.log(name);
                     console.log(this_time);
                     console.log(min_time);
-                    console.log(max_time);
+                      console.log(start_time);
+                      console.log(max_time);
+                      console.log(end_time);
                     console.log('\n\n');
                     answer = self.relevant_data(name, elm);
                   }
@@ -334,7 +338,9 @@ module.exports = (function () {
                     if (min_time <= this_time && this_time <= max_time) {
                       console.log(this_time);
                       console.log(min_time);
+                      console.log(start_time);
                       console.log(max_time);
+                      console.log(end_time);
                       console.log('\n\n');
                       answer = self.relevant_data(name, elm);
                     }
@@ -355,7 +361,9 @@ module.exports = (function () {
             console.log(name);
             console.log(this_time);
             console.log(min_time);
-            console.log(max_time);
+                      console.log(start_time);
+                      console.log(max_time);
+                      console.log(end_time);
             console.log('\n\n');
             answer = self.relevant_data(name, elm);
             }

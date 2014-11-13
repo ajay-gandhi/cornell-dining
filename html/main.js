@@ -36,7 +36,10 @@ $(document).ready(function () {
   console.log(today);
   $.ajax({
     url: 'open',
-    data: { localTime: today.getTime() }
+    data: {
+      localTime: today.getTime(),
+      tzOffset: today.getTimezoneOffset()
+    }
   }).done(function (data) {
     if (data.trim() == '{}') {
       // All dining halls are closed right now

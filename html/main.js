@@ -4,6 +4,8 @@ var map,
 
 var user_marker;
 
+var data;
+
 var today = new Date();
 
 // Object representing current time.
@@ -36,7 +38,8 @@ $(document).ready(function () {
   $.ajax({
     url: 'open',
     data: { localTime: today.getTime() }
-  }).done(function (data) {
+  }).done(function (returned) {
+    data = returned;
     if (data.trim() == '{}') {
       // All dining halls are closed right now
       notify('Everything is closed. Sorry!', -1);
@@ -111,7 +114,22 @@ $(document).ready(function () {
     }
   });
 
-  // They clicked on update
+  // Find the closest eatery
+  $('button#where').click(function () {
+    find_closest(data);
+
+    options_panel.stop().animate({
+      right: '-220px'
+    }, {
+      complete: function () {
+        $('button#show-options').animate({
+          right: '-5px'
+        });
+      }
+    });
+  });
+
+  // They clicked on the time update button
   $('button#update-time').click(function (e) {
     // Stop the form from submitting
     e.preventDefault();
@@ -437,10 +455,6 @@ var find_closest = function (data) {
         // If the notification ever goes away, stop bouncing the marker
         markers.forEach(function (marker) {
           marker.setAnimation(null);
-        });
-        // and slide in the closest eatery button
-        $('div#where, div#where-background').animate({
-          right: '15px'
         });
       });
 

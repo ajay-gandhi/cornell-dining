@@ -13,8 +13,6 @@ var app = express();
  * Requires: [Module] An instance of the eatery module
  */
 module.exports.start_server = function(eatery_object) {
-  app.set('port', (process.env.PORT || 5000));
-
   // Serve up static files from html subdir if requested
   app.use(express.static(__dirname + '/html'));
 
@@ -65,7 +63,9 @@ module.exports.start_server = function(eatery_object) {
   });
 
   // Actually start the server
-  app.listen(app.get('port'), function() {
+  var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080;
+  var server_ip_address = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1';
+  app.listen(server_port, server_ip_address, function() {
     console.log('Server running on port ' + app.get('port'));
   });
 }

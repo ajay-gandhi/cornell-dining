@@ -243,7 +243,7 @@ module.exports = (function () {
                     var max_time = (end_time.getHours() * 100)
                       + end_time.getMinutes();
 
-                    if (end_time.getHours() <= start_time.getHours()) {
+                    if (max_time.getHours() < min_time.getHours()) {
                       // This means the event overflows to the following day
                       // If this is the case, add 24 hours to interval end
                       max_time += 2400;
@@ -254,6 +254,7 @@ module.exports = (function () {
 
                     // Now check if the time is in the interval
                     if (min_time <= this_time && this_time <= max_time) {
+                      console.log(name);
                       console.log(this_time);
                       console.log(min_time);
                       console.log(max_time);
@@ -272,7 +273,7 @@ module.exports = (function () {
                   var max_time = (end_time.getHours() * 100)
                     + end_time.getMinutes();
 
-                  if (end_time.getHours() <= start_time.getHours()) {
+                  if (max_time.getHours() < min_time.getHours()) {
                     // This means the event overflows to the following day
                     // If this is the case, add 24 hours to interval end
                     max_time += 2400;
@@ -296,7 +297,7 @@ module.exports = (function () {
                 // then the place may be open even if the day is incorrect.
                 // In other words, if the event overflows, add the following day
                 // to the array of acceptable days
-                if (end_time.getHours() <= start_time.getHours()) {
+                if (max_time.getHours() < min_time.getHours()) {
                   // The event does overflow
 
                   // Get the last possible day from the repeating days
@@ -351,7 +352,8 @@ module.exports = (function () {
             // Check if the place is open between those times
             if (start_time.getTime() <= currently.getTime()
               && currently.getTime() <= end_time.getTime()) {
-              console.log(this_time);
+            console.log(name);
+            console.log(this_time);
             console.log(min_time);
             console.log(max_time);
             console.log('\n\n');

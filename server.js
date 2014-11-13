@@ -30,7 +30,7 @@ module.exports.start_server = function(eatery_object) {
     var tzOffset = (parseInt(req.query.tzOffset) * 100);
     console.log('\n\n\n\n');
     console.log('timezone offset is ', tzOffset);
-    console.log(new Date(local_time.getTime() - tzOffset);
+    console.log(new Date(local_time.getTime() - tzOffset));
 
     // Pass it to the eatery module to get which places are open
     eatery_object.are_open(local_time, true, tzOffset)

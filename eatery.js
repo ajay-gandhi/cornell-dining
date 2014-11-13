@@ -463,11 +463,13 @@ module.exports = (function () {
 
 /**
  * Parses a time string from Google Calendar into a Date object.
- * Requires: [String] time - A string representing a time
+ * Requires: [String] time    - A string representing a time
  * Returns: [Date] A Date object representing the given time
  */
-var parse_time = function(time) {
-  return new Date(time);
+var parse_time = function(time, is_red) {
+  var redAPI_tz_offset = 240 * 60000;
+  var no_off = new Date(time);
+  return new Date(no_off.getTime() - redAPI_tz_offset);
 }
 
 /**

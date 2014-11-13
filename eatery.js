@@ -283,6 +283,7 @@ module.exports = (function () {
 
                   // Now check if the time is in the interval
                   if (min_time <= this_time && this_time <= max_time) {
+                    console.log(name);
                     console.log(this_time);
                     console.log(min_time);
                     console.log(max_time);

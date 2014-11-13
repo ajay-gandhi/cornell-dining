@@ -26,7 +26,8 @@ module.exports.start_server = function(eatery_object) {
     // and convert it to a date obj
     var local_ms = req.query.localTime;
     var tzOffset = parseInt(req.query.tzOffset) * 60000;
-    var local_time = new Date(parseInt(local_ms) - tzOffset);
+    var localOffset = (new Date()).getTimezoneOffset();
+    var local_time = new Date(parseInt(local_ms) - tzOffset + localOffset);
 
     // Pass it to the eatery module to get which places are open
     eatery_object.are_open(local_time, true, tzOffset)

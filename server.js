@@ -55,8 +55,10 @@ module.exports.start_server = function(eatery_object) {
     var hall = req.query.hall;
     var time = req.query.time;
 
+    console.log('going to get menu');
     what.get_menu(time, hall)
       .then(function (menu) {
+        console.log('got menu');
         res.send(JSON.stringify(menu));
       });
   });

@@ -19,6 +19,7 @@ var menus_url = 'http://living.sas.cornell.edu/dine/whattoeat/menus.cfm';
  * Returns: [Object] The menu for the dining hall
  */
 module.exports.get_menu = function (time, name) {
+  console.log('called get_menu');
   return new Promise(function (resolve, reject) {
     var menu = [];
 
@@ -41,8 +42,10 @@ module.exports.get_menu = function (time, name) {
     // Ensure first char of meal is uppercase
     meal = time_to_meal(new Date(parseInt(time)), name);
 
+    console.log('going to visit main');
     // Visit the browser
     browser.visit(menus_url).then(function () {
+      console.log('visited main');
       // Select the inputted options one by one
       // Have to submit the form after every selection to refresh other options
 
@@ -66,7 +69,7 @@ module.exports.get_menu = function (time, name) {
           }
 
           if (!exists) {
-            // The option isn't there, return that there is no menu
+            // The option isn't there, assume that there is no menu
             resolve([]);
 
           } else {
@@ -76,6 +79,7 @@ module.exports.get_menu = function (time, name) {
             // Wait for new page to load
             browser.wait()
               .then(function() {
+                console.log('filled in options');
                 // Get the div containing the form
                 // This div also contains the menu
                 var menu_container = browser.query('form#menuform').parentNode;
@@ -154,11 +158,3 @@ var time_to_meal = function (d, n) {
     }
   }
 }
-
-
-
-
-
-
-
-

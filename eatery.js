@@ -201,7 +201,7 @@ module.exports = (function () {
 
             // If there is an end property of the returned repeat rule
             // then that is the actual end time for the event
-            var last_time = end_time;
+            var last_time = parse_time(elm.end);
             if (elm.rrule.end) {
               var repeat_end = parse_time(elm.rrule.end);
               last_time.date(repeat_end.date());
@@ -211,7 +211,7 @@ module.exports = (function () {
             } else {
               // Assume the event never ends
               // In other words, set last_time to a Date 2 years in the future
-              var new_full_year = (new Date()).year() + 2;
+              var new_full_year = moment().year() + 2;
               last_time.year(new_full_year);
             }
 
@@ -219,10 +219,11 @@ module.exports = (function () {
               // The event contains info about which days of the week the event
               // repeats. Only continue if given day is one of those and it is
               // the range defined by the repeating event
-              dow = day_of_week(currently);
+              var dow = day_of_week(currently);
+
               if (elm.rrule.weekdays.split(',').indexOf(dow) >= 0
-                && start_time.milliseconds() <= currently.milliseconds()
-                && currently.milliseconds()  <= last_time.milliseconds()) {
+                && start_time.isBefore(currently)
+                && last_time.isAfter(currently)) {
 
                 if (elm.rexcept) {
                   // The event contains a parameter defining an exception to the
@@ -234,7 +235,7 @@ module.exports = (function () {
                     no_go_date.year() == currently.year()
                     && no_go_date.month() == currently.month()
                     && no_go_date.date()  == currently.date()
-                  ) {                
+                  ) {
                     // The exceptions match, so it is not open
                   } else {
                     // Given range is valid, now check hours
@@ -287,11 +288,11 @@ module.exports = (function () {
                   }
                 }
               } else {
-                // If the event overflows into the following day (i.e. Nasties)
+                // If the event overflows into the following day (late night)
                 // then the place may be open even if the day is incorrect.
                 // In other words, if the event overflows, add the following day
                 // to the array of acceptable days
-                if (max_time < min_time) {
+                if (end_time.hour < start_time.hour()) {
                   // The event does overflow
 
                   // Get the last possible day from the repeating days
@@ -307,8 +308,8 @@ module.exports = (function () {
                   acceptable_days.push(days[(days.indexOf(last) + 1) % 7]);
 
                   if (acceptable_days.indexOf(dow) >= 0
-                    && start_time.milliseconds() <= currently.milliseconds()
-                    && currently.milliseconds()  <= last_time.milliseconds()) {
+                    && start_time.isBefore(currently)
+                    && last_time.isAfter(currently)) {
 
                     // Given range is valid, now check hours
                     var this_time = (currently.hour() * 100)
@@ -340,9 +341,9 @@ module.exports = (function () {
             var end_time   = parse_time(elm.end);
 
             // Check if the place is open between those times
-            if (start_time.milliseconds() <= currently.milliseconds()
-              && currently.milliseconds() <= end_time.milliseconds()) {
-            answer = self.relevant_data(name, elm);
+            if (start_time.isBefore(currently)
+              && end_time.isAfter(currently)) {
+              answer = self.relevant_data(name, elm);
             }
           }
         }
@@ -382,7 +383,9 @@ module.exports = (function () {
           // Loop through each set of events
           // Each key is the name of a eatery and each value is the set of
           // events associated with that eatery
+          var total = 0;
           for (var name in all_events) {
+            total++;
             events = all_events[name];
 
             // Get the status of the place and add it to the mapping
@@ -457,7 +460,8 @@ var parse_time = function(time) {
  *   week represented by the given Date object
  */
 var day_of_week = function(date_obj) {
-  return date_obj.isoWeekday();
+  var days = ['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'];
+  return days[date_obj.isoWeekday() - 1];
 }
 
 /**

@@ -39,6 +39,7 @@ $(document).ready(function () {
     url: 'open',
     data: { localTime: today.getTime() }
   }).done(function (returned) {
+    console.log(returned);
     data = returned;
     if (data.trim() == '{}') {
       // All dining halls are closed right now

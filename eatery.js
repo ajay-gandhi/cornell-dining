@@ -7,7 +7,8 @@
  */
 
 var request = require('request'),
-    Promise = require('es6-promise').Promise;
+    Promise = require('es6-promise').Promise,
+    moment  = require('moment');
 
 // RedAPI Endpoint
 var api_url = 'http://redapi-tious.rhcloud.com/dining';
@@ -203,15 +204,15 @@ module.exports = (function () {
             var last_time = end_time;
             if (elm.rrule.end) {
               var repeat_end = parse_time(elm.rrule.end);
-              last_time.setUTCDate(repeat_end.getUTCDate());
-              last_time.setUTCMonth(repeat_end.getUTCMonth());
-              last_time.setFullYear(repeat_end.getUTCFullYear());
+              last_time.date(repeat_end.date());
+              last_time.month(repeat_end.month());
+              last_time.year(repeat_end.year());
 
             } else {
               // Assume the event never ends
               // In other words, set last_time to a Date 2 years in the future
-              var new_full_year = (new Date()).getUTCFullYear() + 2;
-              last_time.setFullYear(new_full_year);
+              var new_full_year = (new Date()).year() + 2;
+              last_time.year(new_full_year);
             }
 
             if (elm.rrule.weekdays) {
@@ -220,8 +221,8 @@ module.exports = (function () {
               // the range defined by the repeating event
               dow = day_of_week(currently);
               if (elm.rrule.weekdays.split(',').indexOf(dow) >= 0
-                && start_time.getTime() <= currently.getTime()
-                && currently.getTime()  <= last_time.getTime()) {
+                && start_time.milliseconds() <= currently.milliseconds()
+                && currently.milliseconds()  <= last_time.milliseconds()) {
 
                 if (elm.rexcept) {
                   // The event contains a parameter defining an exception to the
@@ -230,21 +231,21 @@ module.exports = (function () {
                   var no_go_date = parse_time(elm.rexcept);
 
                   if (
-                    no_go_date.getUTCFullYear() == currently.getUTCFullYear()
-                    && no_go_date.getUTCMonth() == currently.getUTCMonth()
-                    && no_go_date.getUTCDate()  == currently.getUTCDate()
+                    no_go_date.year() == currently.year()
+                    && no_go_date.month() == currently.month()
+                    && no_go_date.date()  == currently.date()
                   ) {                
                     // The exceptions match, so it is not open
                   } else {
                     // Given range is valid, now check hours
-                    var this_time = (currently.getUTCHours() * 100)
-                      + currently.getUTCMinutes();
+                    var this_time = (currently.hour() * 100)
+                      + currently.minute();
 
-                    var min_time = (start_time.getUTCHours() * 100)
-                      + end_time.getUTCMinutes();
+                    var min_time = (start_time.hour() * 100)
+                      + end_time.minute();
 
-                    var max_time = (end_time.getUTCHours() * 100)
-                      + end_time.getUTCMinutes();
+                    var max_time = (end_time.hour() * 100)
+                      + end_time.minute();
 
                     if (max_time < min_time) {
                       // This means the event overflows to the following day
@@ -262,14 +263,14 @@ module.exports = (function () {
                   }
                 } else {
                   // Given range is valid, now check hours
-                  var this_time = (currently.getUTCHours() * 100)
-                    + currently.getUTCMinutes();
+                  var this_time = (currently.hour() * 100)
+                    + currently.minute();
 
-                  var min_time = (start_time.getUTCHours() * 100)
-                    + end_time.getUTCMinutes();
+                  var min_time = (start_time.hour() * 100)
+                    + end_time.minute();
 
-                  var max_time = (end_time.getUTCHours() * 100)
-                    + end_time.getUTCMinutes();
+                  var max_time = (end_time.hour() * 100)
+                    + end_time.minute();
 
                   if (max_time < min_time) {
                     // This means the event overflows to the following day
@@ -306,18 +307,18 @@ module.exports = (function () {
                   acceptable_days.push(days[(days.indexOf(last) + 1) % 7]);
 
                   if (acceptable_days.indexOf(dow) >= 0
-                    && start_time.getTime() <= currently.getTime()
-                    && currently.getTime()  <= last_time.getTime()) {
+                    && start_time.milliseconds() <= currently.milliseconds()
+                    && currently.milliseconds()  <= last_time.milliseconds()) {
 
                     // Given range is valid, now check hours
-                    var this_time = (currently.getUTCHours() * 100)
-                      + currently.getUTCMinutes();
+                    var this_time = (currently.hour() * 100)
+                      + currently.minute();
 
-                    var min_time = (start_time.getUTCHours() * 100)
-                      + end_time.getUTCMinutes();
+                    var min_time = (start_time.hour() * 100)
+                      + end_time.minute();
 
-                    var max_time = (end_time.getUTCHours() * 100)
-                      + end_time.getUTCMinutes();
+                    var max_time = (end_time.hour() * 100)
+                      + end_time.minute();
 
                     // The event overflows so add 2400 to the end time
                     this_time += 2400;
@@ -339,8 +340,8 @@ module.exports = (function () {
             var end_time   = parse_time(elm.end);
 
             // Check if the place is open between those times
-            if (start_time.getTime() <= currently.getTime()
-              && currently.getTime() <= end_time.getTime()) {
+            if (start_time.milliseconds() <= currently.milliseconds()
+              && currently.milliseconds() <= end_time.milliseconds()) {
             answer = self.relevant_data(name, elm);
             }
           }
@@ -357,12 +358,13 @@ module.exports = (function () {
    *   (see local function relevant_data() below). If the eatery is closed, the
    *   mapping will map to false. If parameter open_only is true, the mapping
    *   will only include eateries that are open at the given time.
-   * Requires: [Date]    currently - The time to check
+   * Requires: [int]     currently - The time to check, in ms since Unix
    *           [boolean] open_only - Whether to only include open eateries
    * Returns: [Promise] A mapping of every given eatery to its current status.
    */
   Eateries.prototype.are_open = function(currently, open_only) {
     var self = this;
+    var currently = parse_time(currently);
 
     return new Promise(function (resolve, reject) {
       var places = {},
@@ -419,8 +421,8 @@ module.exports = (function () {
     var s = parse_time(evt.start);
     var e = parse_time(evt.end);
     var return_obj = {
-      start: (s.getUTCHours() * 100) + s.getUTCMinutes(),
-      end: (e.getUTCHours() * 100) + e.getUTCMinutes(),
+      start: (s.hour() * 100) + s.minute(),
+      end: (e.hour() * 100) + e.minute(),
       summary: evt.summary
     }
 
@@ -435,15 +437,16 @@ module.exports = (function () {
 })();
 
 
+/******************************************************************************/
 /******************************* Local Functions ******************************/
-
+/******************************************************************************/
 /**
  * Parses a time string from Google Calendar into a Date object.
- * Requires: [String] time    - A string representing a time
+ * Requires: [String] time - A string representing a time
  * Returns: [Date] A Date object representing the given time
  */
 var parse_time = function(time) {
-  return new Date(time);
+  return moment(time).utc();
 }
 
 /**
@@ -454,8 +457,7 @@ var parse_time = function(time) {
  *   week represented by the given Date object
  */
 var day_of_week = function(date_obj) {
-  var days = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'];
-  return days[date_obj.getDay()];
+  return date_obj.isoWeekday();
 }
 
 /**

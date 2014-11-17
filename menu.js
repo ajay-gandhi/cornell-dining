@@ -2,15 +2,18 @@
  * This module handles the dining hall menus
  */
 
-var browser = new (require('zombie'))(),
+var Zombie = require('zombie'),
     Promise = require('es6-promise').Promise;
+
+var menus_url = 'http://living.sas.cornell.edu/dine/whattoeat/menus.cfm';
+Zombie.localhost(menus_url, 17000);
+
+var browser = new Zombie();
 
 // Catch and log any browser errors
 browser.on('error', function(err) {
   console.error(err);
 });
-
-var menus_url = 'http://living.sas.cornell.edu/dine/whattoeat/menus.cfm';
 
 /**
  * Fetches the menu for a given dining hall at a given time
@@ -44,7 +47,7 @@ module.exports.get_menu = function (time, name) {
 
     console.log('going to visit main');
     // Visit the browser
-    browser.visit(menus_url, { debug: true }).then(function () {
+    browser.visit(menus_url).then(function () {
       console.log('visited main');
       // Select the inputted options one by one
       // Have to submit the form after every selection to refresh other options

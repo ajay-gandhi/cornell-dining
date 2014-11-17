@@ -44,7 +44,7 @@ module.exports.get_menu = function (time, name) {
 
     console.log('going to visit main');
     // Visit the browser
-    browser.visit(menus_url).then(function () {
+    browser.visit(menus_url, { debug: true }).then(function () {
       console.log('visited main');
       // Select the inputted options one by one
       // Have to submit the form after every selection to refresh other options

@@ -100,8 +100,17 @@ $(document).ready(function () {
   // Click event to close menu tool
   $('button#close-menu-tool').click(function (e) {
     e.preventDefault();
-    $('div#menu-tool, div#menu-background').animate({
-      top: '-' + ($('div#menu-tool').outerHeight() + 50)
+    // Hide background cover
+    $('div#menu-background').fadeOut($(window).height(), function () {
+      $(this).css({
+        display: 'none'
+      });
+    });
+    // Slide up menu tool
+    $('div#menu-tool').animate({
+      top: '-600'
+    }, {
+      duration: $(window).height()
     });
   });
 
@@ -294,10 +303,17 @@ var add_infowindow = function (e, m, n) {
     // Click event for menu
     $('div.infowindow div.menu').click(function () {
       remove_all_notifications();
-      $('div#menu-tool, div#menu-background')
+      $('div#menu-background').fadeOut($(window).height(), function () {
+        $(this).css({
+          display: 'none'
+        });
+      });
+
+      $('div#menu-tool')
         .animate({
-          top: '-' + ($('div#menu-tool').outerHeight() + 50)
+          top: '-600'
         }, {
+          duration: $(window).height(),
           complete: function () {
             find_menu(n);
           }
@@ -355,7 +371,7 @@ var notify = function (msg, duration, callback) {
   $('div#notification-' + id).animate({
     top: '0px'
   }, {
-    duration: 1000,
+    duration: 500,
     complete: function() {
       if (duration > 0) {
         // Remove the notification after the given duration
@@ -380,7 +396,7 @@ var remove_notification = function (id, callback) {
     $('div#notification-' + id).stop().animate({
       top: '-60px'
     }, {
-      duration: 1000,
+      duration: 500,
       complete: function() {
         $(this).remove();
         if (callback) {
@@ -507,24 +523,44 @@ var find_menu = function (name) {
       $('div#menu-content').append('<br /></div></p>');
     });
 
-    // Set the width and height of the background to that of the content
-    $('div#menu-background').css({
-      height: $('div#menu-tool').outerHeight()
-    });
-
-    var menu_tool = $('div#menu-tool, div#menu-background');
     // The user may have already removed the notification
     if ($('div#notification-' + finding_menu).length == 0) {
+      // Cover background
+      $('div#menu-background')
+        .css({
+          display: 'block'
+        })
+        .fadeTo($(window).height(), 0.8);
+
       // Slide it down
-      menu_tool.animate({
-        top: '15px'
-      });
+      $('div#menu-tool')
+        .css({
+          left: ($(window).width() - $('div#menu-tool').outerWidth()) / 2
+        })
+        .animate({
+          top: ($(window).height() - $('div#menu-tool').outerHeight()) / 2
+        }, {
+          duration: $(window).height()
+        });
     } else {
       remove_notification(finding_menu, function () {
+        // Cover background
+        $('div#menu-background')
+          .css({
+            display: 'block'
+          })
+          .fadeTo($(window).height(), 0.8);
+
         // Slide it down
-        menu_tool.animate({
-          top: '15px'
-        });
+        $('div#menu-tool')
+          .css({
+            left: ($(window).width() - $('div#menu-tool').outerWidth()) / 2
+          })
+          .animate({
+            top: ($(window).height() - $('div#menu-tool').outerHeight()) / 2
+          }, {
+            duration: $(window).height()
+          });
       });
     }
   });

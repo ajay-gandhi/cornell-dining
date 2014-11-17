@@ -8,12 +8,8 @@ var Zombie = require('zombie'),
 var menus_url = 'http://living.sas.cornell.edu/dine/whattoeat/menus.cfm';
 Zombie.localhost(menus_url, 17000);
 
-var browser = new Zombie();
-
-// Catch and log any browser errors
-browser.on('error', function(err) {
-  console.error(err);
-});
+// Create the browser
+var browser = Zombie.create();
 
 /**
  * Fetches the menu for a given dining hall at a given time
@@ -42,11 +38,12 @@ module.exports.get_menu = function (time, name) {
 
     // Hall ids aren't 0 indexed
     var hall_id = hall_ids.indexOf(name) + 1;
+
     // Ensure first char of meal is uppercase
     meal = time_to_meal(new Date(parseInt(time)), name);
 
     console.log('going to visit main');
-    // Visit the browser
+    // Visit the page
     browser.visit(menus_url).then(function () {
       console.log('visited main');
       // Select the inputted options one by one
@@ -58,7 +55,8 @@ module.exports.get_menu = function (time, name) {
       browser.select('menuperiod', meal);
       browser.document.forms[0].submit();
       // Wait for new page to load
-      browser.wait()
+      browser
+        .wait()
         .then(function () {
 
           // Check if the dining hall option exists
@@ -80,7 +78,8 @@ module.exports.get_menu = function (time, name) {
             browser.document.forms[0].submit();
 
             // Wait for new page to load
-            browser.wait()
+            browser
+              .wait()
               .then(function() {
                 console.log('filled in options');
                 // Get the div containing the form

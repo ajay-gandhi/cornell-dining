@@ -4,15 +4,22 @@
 
 var express = require('express'),
     closest = require('./closest'),
-    what    = require('./menu');
+    Menu    = require('./menu');
 
 var app = express();
+
+var menu;
 
 /**
  * Starts an http server.
  * Requires: [Module] An instance of the eatery module
  */
 module.exports.start_server = function(eatery_object) {
+  var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080;
+  var server_ip_address = process.env.OPENSHIFT_NODEJS_IP;
+
+  menu = new Menu(server_ip_address);
+
   // Serve up static files from html subdir if requested
   app.use(express.static(__dirname + '/html'));
 
@@ -56,7 +63,7 @@ module.exports.start_server = function(eatery_object) {
     var time = req.query.time;
 
     console.log('going to get menu');
-    what.get_menu(time, hall)
+    menu.get_menu(time, hall)
       .then(function (menu) {
         console.log('got menu');
         res.send(JSON.stringify(menu));
@@ -64,8 +71,6 @@ module.exports.start_server = function(eatery_object) {
   });
 
   // Actually start the server
-  var server_port = process.env.OPENSHIFT_NODEJS_PORT || 8080;
-  var server_ip_address = process.env.OPENSHIFT_NODEJS_IP;
   app.listen(server_port, server_ip_address, function() {
     console.log('Server running on port ' + server_port);
   });

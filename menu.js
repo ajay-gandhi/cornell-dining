@@ -50,8 +50,12 @@ module.exports = (function () {
 
       console.log('going to visit main');
       // Visit the page
-      browser.visit(menus_url).then(function () {
+      browser.visit(menus_url);
+      browser.wait(function (window) {
+        return window.document.querySelector('#menulocations');
+      }, function () {
         console.log('visited main');
+        console.log(browser.html('body'));
         // Select the inputted options one by one
         // Have to submit the form after every selection to refresh other options
 
@@ -67,7 +71,7 @@ module.exports = (function () {
 
             // Check if the dining hall option exists
             var exists = false;
-            var options = browser.query('#menulocations').options;
+            var options = browser.querySelector('#menulocations').options;
             for (var c = 0; c < options.length; c++) {
               option = options[c];
               if (option.value === hall_id.toString()) {
